@@ -1,0 +1,1326 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+assets/
+  css/
+    styles.css
+  img/
+    icono-caballo-azul.png
+    icono-caballo-blanco.png
+    logo-azul.png
+    logo-blanco.png
+  js/
+    script.js
+index.html
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="assets/css/styles.css">
+/* ==========================================================================
+   Andrés Montalvo Chero — Corredor de Seguros
+   ========================================================================== */
+
+:root {
+  /* Paleta de marca */
+  --azul-marca: #0A3E84;
+  --azul-marino: #06264F;
+  --hueso: #F7F5F0;
+  --verde-whatsapp: #25D366;
+  --verde-whatsapp-hover: #1EBE59;
+  --naranja-marca: #E8871E;
+  --texto-oscuro: #1F2430;
+  --blanco: #FFFFFF;
+  --error: #B3261E;
+
+  /* Tipografía */
+  --font-titulares: 'Fraunces', Georgia, serif;
+  --font-cuerpo: 'Work Sans', Arial, sans-serif;
+
+  /* Layout */
+  --container-max: 1180px;
+  --container-pad: 1.5rem;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  /* Transiciones */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Reset y base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-cuerpo);
+  color: var(--texto-oscuro);
+  background: var(--hueso);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+dl {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+dd {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-titulares);
+  color: var(--azul-marino);
+  margin: 0;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--azul-marca);
+  color: var(--blanco);
+  padding: 0.75rem 1.25rem;
+  z-index: 200;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--naranja-marca);
+  outline-offset: 2px;
+}
+
+.section-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 4.5rem var(--container-pad);
+}
+
+.section-head {
+  max-width: 42rem;
+  margin-bottom: 2.75rem;
+}
+
+.section-head h2 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+}
+
+.section-head p {
+  font-size: 1.05rem;
+  color: #3A4258;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(247, 245, 240, 0.98);
+  border-bottom: 1px solid rgba(6, 38, 79, 0.1);
+}
+
+.header-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0.75rem var(--container-pad);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand-logo {
+  height: 46px;
+  width: auto;
+}
+
+.nav-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 110;
+}
+
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  width: 26px;
+  margin: 0 auto;
+  background: var(--azul-marino);
+  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.nav-menu {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  background: var(--azul-marino);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.75rem;
+  padding: 2rem 2rem;
+  transform: translateX(100%);
+  transition: transform 0.35s var(--ease);
+  z-index: 105;
+}
+
+.nav-menu.is-open {
+  transform: translateX(0);
+}
+
+.nav-link {
+  font-size: 1.5rem;
+  font-family: var(--font-titulares);
+  color: var(--hueso);
+}
+
+.nav-cta {
+  margin-top: 1rem;
+  background: var(--verde-whatsapp);
+  color: var(--azul-marino);
+  font-weight: 600;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.hero {
+  background: var(--azul-marca);
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 4rem var(--container-pad) 3.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  position: relative;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--hueso);
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 1.1rem;
+  opacity: 0;
+  animation: entrada 0.7s var(--ease) forwards;
+  animation-delay: 0.05s;
+}
+
+.eyebrow-mark {
+  width: 26px;
+  height: 3px;
+  background: var(--naranja-marca);
+  display: inline-block;
+}
+
+.hero-title {
+  font-size: clamp(2.3rem, 6vw, 3.6rem);
+  font-weight: 600;
+  color: var(--hueso);
+  max-width: 15ch;
+  opacity: 0;
+  animation: entrada 0.7s var(--ease) forwards;
+  animation-delay: 0.18s;
+}
+
+.hero-subtitle {
+  margin-top: 1.5rem;
+  max-width: 34rem;
+  color: rgba(247, 245, 240, 0.85);
+  font-size: 1.08rem;
+  opacity: 0;
+  animation: entrada 0.7s var(--ease) forwards;
+  animation-delay: 0.32s;
+}
+
+.btn-whatsapp {
+  margin-top: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--verde-whatsapp);
+  color: var(--azul-marino);
+  font-weight: 600;
+  font-size: 1.02rem;
+  padding: 0.95rem 1.75rem;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  animation: entrada 0.7s var(--ease) forwards;
+  animation-delay: 0.46s;
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.btn-whatsapp:hover {
+  background: var(--verde-whatsapp-hover);
+  transform: translateY(-2px);
+}
+
+.icon-whatsapp {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.hero-mark {
+  display: none;
+}
+
+.hero-horse {
+  width: 100%;
+  opacity: 0;
+  animation: entradaHorse 0.9s var(--ease) forwards;
+  animation-delay: 0.25s;
+}
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes entradaHorse {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Servicios
+   -------------------------------------------------------------------------- */
+
+.soat-feature {
+  background: var(--azul-marino);
+  color: var(--hueso);
+  border-radius: var(--radius-md);
+  padding: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.soat-tag {
+  color: var(--naranja-marca);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.soat-feature h3 {
+  color: var(--hueso);
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-weight: 600;
+}
+
+.soat-feature p {
+  margin-top: 1rem;
+  max-width: 34rem;
+  color: rgba(247, 245, 240, 0.85);
+  font-size: 1.02rem;
+}
+
+.btn-outline {
+  display: inline-block;
+  margin-top: 1.5rem;
+  border: 1.5px solid var(--hueso);
+  color: var(--hueso);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.btn-outline:hover {
+  background: var(--hueso);
+  color: var(--azul-marino);
+}
+
+.soat-price {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-top: 1px solid rgba(247, 245, 240, 0.25);
+  padding-top: 1.5rem;
+}
+
+.price-label {
+  font-size: 0.95rem;
+  color: rgba(247, 245, 240, 0.7);
+}
+
+.price-value {
+  font-family: var(--font-titulares);
+  font-size: clamp(2.4rem, 6vw, 3.2rem);
+  font-weight: 600;
+  color: var(--naranja-marca);
+}
+
+.service-list {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.service-row {
+  padding: 1.4rem 0;
+  border-top: 1px solid rgba(6, 38, 79, 0.14);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  transition: padding-left 0.2s var(--ease);
+}
+
+.service-list li:last-child {
+  border-bottom: 1px solid rgba(6, 38, 79, 0.14);
+}
+
+.service-row h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--azul-marino);
+}
+
+.service-row p {
+  color: #3A4258;
+  font-size: 0.98rem;
+}
+
+.service-row:hover {
+  padding-left: 0.6rem;
+}
+
+.service-row:hover h3 {
+  color: var(--azul-marca);
+}
+
+/* --------------------------------------------------------------------------
+   Quiénes somos
+   -------------------------------------------------------------------------- */
+
+.nosotros {
+  background: var(--azul-marino);
+  color: var(--hueso);
+}
+
+.nosotros-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.nosotros-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.stat-number {
+  font-family: var(--font-titulares);
+  font-size: clamp(4.5rem, 14vw, 7rem);
+  font-weight: 700;
+  color: var(--naranja-marca);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 1.05rem;
+  color: rgba(247, 245, 240, 0.8);
+}
+
+.nosotros-quote {
+  font-family: var(--font-titulares);
+  font-style: italic;
+  font-size: clamp(1.3rem, 3vw, 1.65rem);
+  color: var(--hueso);
+  border-left: 3px solid var(--naranja-marca);
+  padding-left: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.nosotros-copy p:not(.nosotros-quote) {
+  color: rgba(247, 245, 240, 0.8);
+  font-size: 1.02rem;
+  max-width: 36rem;
+}
+
+/* --------------------------------------------------------------------------
+   Contacto
+   -------------------------------------------------------------------------- */
+
+.contacto-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-field label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--azul-marino);
+}
+
+.form-field input,
+.form-field textarea {
+  font-family: var(--font-cuerpo);
+  font-size: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid rgba(6, 38, 79, 0.25);
+  border-radius: var(--radius-sm);
+  background: var(--blanco);
+  color: var(--texto-oscuro);
+  transition: border-color 0.2s var(--ease);
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: var(--azul-marca);
+}
+
+.form-field.has-error input,
+.form-field.has-error textarea {
+  border-color: var(--error);
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 0.85rem;
+  min-height: 1.1em;
+}
+
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.btn-submit {
+  align-self: flex-start;
+  background: var(--azul-marca);
+  color: var(--hueso);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.9rem 2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s var(--ease);
+}
+
+.btn-submit:hover {
+  background: var(--azul-marino);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-status {
+  font-size: 0.95rem;
+  min-height: 1.2em;
+}
+
+.form-status.is-success {
+  color: #1E7A3D;
+}
+
+.form-status.is-error {
+  color: var(--error);
+}
+
+.contact-direct {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.direct-whatsapp {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--verde-whatsapp);
+  color: var(--azul-marino);
+  padding: 1.2rem 1.5rem;
+  border-radius: var(--radius-md);
+  transition: transform 0.2s var(--ease);
+}
+
+.direct-whatsapp:hover {
+  transform: translateY(-2px);
+}
+
+.direct-whatsapp .icon-whatsapp {
+  width: 30px;
+  height: 30px;
+}
+
+.direct-whatsapp span {
+  display: flex;
+  flex-direction: column;
+}
+
+.direct-whatsapp strong {
+  font-size: 1.15rem;
+}
+
+.direct-whatsapp em {
+  font-style: normal;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid rgba(6, 38, 79, 0.14);
+  border-bottom: 1px solid rgba(6, 38, 79, 0.14);
+  padding: 1.2rem 0;
+}
+
+.contact-list dt {
+  font-size: 0.85rem;
+  color: #6B7286;
+}
+
+.contact-list dd a {
+  font-weight: 600;
+  color: var(--azul-marino);
+}
+
+.contact-list dd a:hover {
+  color: var(--azul-marca);
+}
+
+.contact-locations {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.location h3 {
+  font-size: 1.05rem;
+  color: var(--azul-marino);
+  margin-bottom: 0.2rem;
+}
+
+.location p {
+  color: #3A4258;
+  font-size: 0.98rem;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer {
+  background: var(--azul-marca);
+  color: var(--hueso);
+}
+
+.footer-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 3rem var(--container-pad) 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.footer-logo {
+  height: 44px;
+  width: auto;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.footer-nav a {
+  color: rgba(247, 245, 240, 0.85);
+  font-size: 0.98rem;
+}
+
+.footer-nav a:hover {
+  color: var(--hueso);
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--hueso);
+  font-weight: 500;
+}
+
+.footer-social svg {
+  width: 22px;
+  height: 22px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(247, 245, 240, 0.15);
+}
+
+.footer-bottom p {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 1.25rem var(--container-pad);
+  font-size: 0.85rem;
+  color: rgba(247, 245, 240, 0.65);
+}
+
+/* --------------------------------------------------------------------------
+   Media queries
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 700px) {
+  .soat-feature {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: center;
+  }
+
+  .soat-price {
+    border-top: none;
+    border-left: 1px solid rgba(247, 245, 240, 0.25);
+    padding-top: 0;
+    padding-left: 2rem;
+  }
+
+  .service-list {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 3rem;
+  }
+
+  .nosotros-inner {
+    grid-template-columns: auto 1fr;
+    gap: 4rem;
+  }
+
+  .contacto-grid {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .footer-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 860px) {
+  .nav-toggle {
+    display: none;
+  }
+
+  .nav-menu {
+    position: static;
+    background: none;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    transform: none;
+    gap: 2rem;
+  }
+
+  .nav-link {
+    font-size: 1rem;
+    font-family: var(--font-cuerpo);
+    font-weight: 500;
+    color: var(--azul-marino);
+  }
+
+  .nav-link:hover {
+    color: var(--azul-marca);
+  }
+
+  .nav-cta {
+    margin-top: 0;
+    padding: 0.6rem 1.3rem;
+    font-size: 0.95rem;
+  }
+
+  .hero-mark {
+    display: block;
+    position: absolute;
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46%;
+    max-width: 560px;
+    z-index: 1;
+  }
+
+  .hero-inner {
+    grid-template-columns: 1.15fr 0.85fr;
+    min-height: 560px;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+</file>
+
+<file path="assets/js/script.js">
+(function () {
+  'use strict';
+
+  /* Año dinámico en el footer */
+  var yearEl = document.getElementById('year');
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear();
+  }
+
+  /* Menú mobile */
+  var navToggle = document.getElementById('nav-toggle');
+  var navMenu = document.getElementById('nav-menu');
+
+  function closeMenu() {
+    navMenu.classList.remove('is-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Abrir menú de navegación');
+  }
+
+  function openMenu() {
+    navMenu.classList.add('is-open');
+    navToggle.setAttribute('aria-expanded', 'true');
+    navToggle.setAttribute('aria-label', 'Cerrar menú de navegación');
+  }
+
+  if (navToggle && navMenu) {
+    navToggle.addEventListener('click', function () {
+      var isOpen = navMenu.classList.contains('is-open');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    navMenu.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && navMenu.classList.contains('is-open')) {
+        closeMenu();
+        navToggle.focus();
+      }
+    });
+  }
+
+  /* Validación y envío del formulario de contacto */
+  var form = document.getElementById('contact-form');
+
+  if (form) {
+    var fields = {
+      nombre: {
+        input: document.getElementById('nombre'),
+        error: document.getElementById('error-nombre'),
+        validate: function (value) {
+          return value.trim().length >= 2 ? '' : 'Ingresa tu nombre completo.';
+        }
+      },
+      email: {
+        input: document.getElementById('email'),
+        error: document.getElementById('error-email'),
+        validate: function (value) {
+          var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return re.test(value.trim()) ? '' : 'Ingresa un correo electrónico válido.';
+        }
+      },
+      telefono: {
+        input: document.getElementById('telefono'),
+        error: document.getElementById('error-telefono'),
+        validate: function (value) {
+          var re = /^[0-9+()\s-]{6,20}$/;
+          return re.test(value.trim()) ? '' : 'Ingresa un teléfono válido.';
+        }
+      },
+      mensaje: {
+        input: document.getElementById('mensaje'),
+        error: document.getElementById('error-mensaje'),
+        validate: function (value) {
+          return value.trim().length >= 10 ? '' : 'Cuéntame un poco más (mínimo 10 caracteres).';
+        }
+      }
+    };
+
+    function validateField(field) {
+      var message = field.validate(field.input.value);
+      field.error.textContent = message;
+      field.input.closest('.form-field').classList.toggle('has-error', Boolean(message));
+      return !message;
+    }
+
+    Object.keys(fields).forEach(function (key) {
+      var field = fields[key];
+      field.input.addEventListener('blur', function () {
+        validateField(field);
+      });
+      field.input.addEventListener('input', function () {
+        if (field.input.closest('.form-field').classList.contains('has-error')) {
+          validateField(field);
+        }
+      });
+    });
+
+    var honeypot = document.getElementById('empresa_web');
+    var submitBtn = document.getElementById('btn-submit');
+    var statusEl = document.getElementById('form-status');
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      if (honeypot && honeypot.value.trim() !== '') {
+        return;
+      }
+
+      var isValid = true;
+      Object.keys(fields).forEach(function (key) {
+        if (!validateField(fields[key])) {
+          isValid = false;
+        }
+      });
+
+      if (!isValid) {
+        statusEl.textContent = 'Revisa los campos marcados antes de enviar.';
+        statusEl.className = 'form-status is-error';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      statusEl.textContent = 'Enviando mensaje...';
+      statusEl.className = 'form-status';
+
+      var formData = new FormData(form);
+
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formData
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data.success) {
+            statusEl.textContent = 'Gracias por escribir. Te contactaré a la brevedad.';
+            statusEl.className = 'form-status is-success';
+            form.reset();
+          } else {
+            statusEl.textContent = 'No se pudo enviar el mensaje. Intenta nuevamente o escríbeme por WhatsApp.';
+            statusEl.className = 'form-status is-error';
+          }
+        })
+        .catch(function () {
+          statusEl.textContent = 'No se pudo enviar el mensaje. Intenta nuevamente o escríbeme por WhatsApp.';
+          statusEl.className = 'form-status is-error';
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+        });
+    });
+  }
+})();
+</file>
+
+<file path="index.html">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Andrés Montalvo Chero | Corredor de Seguros en Lima y Andahuaylas</title>
+<meta name="description" content="Más de 26 años de experiencia como corredor de seguros. SOAT desde S/64.99, seguro vehicular, seguros personales, patrimoniales y de ingeniería. Atención en Lima y Andahuaylas.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Andrés Montalvo Chero | Corredor de Seguros">
+<meta property="og:description" content="26 años protegiendo lo que más te importa. SOAT desde S/64.99 y toda la línea de seguros personales y patrimoniales. Escríbeme por WhatsApp.">
+<meta property="og:image" content="assets/img/logo-azul.png">
+<meta property="og:url" content="https://montalvoseguros.com.pe/">
+<meta property="og:locale" content="es_PE">
+
+<link rel="icon" type="image/png" href="assets/img/icono-caballo-azul.png">
+<link rel="apple-touch-icon" href="assets/img/icono-caballo-azul.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a href="#inicio" class="brand" aria-label="Andrés Montalvo Chero, corredor de seguros - ir al inicio">
+      <img src="assets/img/logo-azul.png" alt="Andrés Montalvo Chero, corredor de seguros" class="brand-logo">
+    </a>
+
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú de navegación">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="nav-menu" id="nav-menu">
+      <a href="#inicio" class="nav-link">Inicio</a>
+      <a href="#servicios" class="nav-link">Servicios</a>
+      <a href="#nosotros" class="nav-link">Quiénes somos</a>
+      <a href="#contacto" class="nav-link">Contacto</a>
+      <a href="https://wa.me/51991472352" target="_blank" rel="noopener noreferrer" class="nav-cta">WhatsApp</a>
+    </nav>
+  </div>
+</header>
+
+<main id="contenido">
+
+  <section class="hero" id="inicio">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>Andrés Montalvo Chero</p>
+        <h1 class="hero-title">26 años protegiendo<br>lo que más te importa</h1>
+        <p class="hero-subtitle">Corredor de seguros independiente, trabajando con aseguradoras reconocidas como La Positiva para darte respaldo real cuando más lo necesitas.</p>
+        <a href="https://wa.me/51991472352?text=Hola%20Andrés%2C%20quisiera%20información%20sobre%20un%20seguro" target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+          <svg viewBox="0 0 24 24" class="icon-whatsapp" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.29-.15-1.71-.84-1.97-.94-.27-.1-.46-.15-.66.15-.19.29-.75.94-.92 1.13-.17.19-.34.22-.63.07-.29-.15-1.22-.45-2.32-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.66-1.59-.9-2.18-.24-.57-.48-.49-.66-.5h-.56c-.19 0-.51.07-.78.36-.27.29-1.02 1-1.02 2.43 0 1.43 1.04 2.82 1.19 3.01.15.19 2.05 3.13 4.97 4.39.69.3 1.23.48 1.65.61.69.22 1.32.19 1.82.11.55-.08 1.71-.7 1.95-1.37.24-.68.24-1.26.17-1.38-.07-.12-.26-.19-.55-.34z"/><path fill="currentColor" d="M12.02 2C6.5 2 2.02 6.48 2.02 12c0 1.87.5 3.62 1.44 5.13L2 22l4.98-1.4A9.96 9.96 0 0 0 12.02 22C17.53 22 22 17.52 22 12S17.53 2 12.02 2zm0 18.11c-1.68 0-3.29-.46-4.69-1.32l-.34-.2-3 .84.8-2.94-.22-.35A8.1 8.1 0 0 1 3.9 12c0-4.48 3.65-8.12 8.12-8.12S20.14 7.52 20.14 12s-3.65 8.11-8.12 8.11z"/></svg>
+          Escríbeme por WhatsApp
+        </a>
+      </div>
+      <div class="hero-mark" aria-hidden="true">
+        <img src="assets/img/icono-caballo-blanco.png" alt="" class="hero-horse">
+      </div>
+    </div>
+  </section>
+
+  <section class="servicios" id="servicios">
+    <div class="section-inner">
+      <div class="section-head">
+        <h2>Seguros a tu medida</h2>
+        <p>Del trámite obligatorio para tu vehículo hasta la protección de tu patrimonio, cada póliza se arma según lo que realmente necesitas.</p>
+      </div>
+
+      <div class="soat-feature">
+        <div class="soat-copy">
+          <p class="soat-tag">Producto estrella</p>
+          <h3>SOAT</h3>
+          <p>El seguro obligatorio para circular sin multas ni contratiempos, con cobertura ante accidentes de tránsito para ti, tus pasajeros y terceros. Emisión inmediata.</p>
+          <a href="https://wa.me/51991472352?text=Hola%20Andrés%2C%20quisiera%20cotizar%20mi%20SOAT" target="_blank" rel="noopener noreferrer" class="btn-outline">Cotiza tu SOAT</a>
+        </div>
+        <div class="soat-price">
+          <span class="price-label">Desde</span>
+          <span class="price-value">S/ 64.99</span>
+        </div>
+      </div>
+
+      <ul class="service-list">
+        <li class="service-row">
+          <h3>Seguro Vehicular</h3>
+          <p>Cobertura contra choques, robo y daños a terceros para tu auto.</p>
+        </li>
+        <li class="service-row">
+          <h3>Seguro de Viajes</h3>
+          <p>Asistencia médica y protección para tus viajes dentro y fuera del Perú.</p>
+        </li>
+        <li class="service-row">
+          <h3>Seguro Domiciliario</h3>
+          <p>Protege tu casa contra incendio, robo y desastres naturales.</p>
+        </li>
+        <li class="service-row">
+          <h3>Seguros Personales</h3>
+          <p>Vida, accidentes y salud para ti y tu familia.</p>
+        </li>
+        <li class="service-row">
+          <h3>Seguros Patrimoniales</h3>
+          <p>Cobertura para negocios, locales comerciales y bienes de valor.</p>
+        </li>
+        <li class="service-row">
+          <h3>Seguros de Ingeniería</h3>
+          <p>Protección para obras civiles, montaje y equipo de construcción.</p>
+        </li>
+        <li class="service-row">
+          <h3>SCTR</h3>
+          <p>Seguro Complementario de Trabajo de Riesgo, obligatorio para tu personal.</p>
+        </li>
+        <li class="service-row">
+          <h3>MEDISALUD</h3>
+          <p>Cobertura de salud particular con acceso a clínicas privadas.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="nosotros" id="nosotros">
+    <div class="section-inner nosotros-inner">
+      <div class="nosotros-stat">
+        <span class="stat-number">26</span>
+        <span class="stat-label">años de<br>experiencia</span>
+      </div>
+      <div class="nosotros-copy">
+        <p class="nosotros-quote">"Más de 26 años de experiencia como corredor de seguros, trabajando con aseguradoras reconocidas como La Positiva para brindarte respaldo y tranquilidad."</p>
+        <p>Atiendo de forma cercana y personal, en Lima y en Andahuaylas, para que elegir un seguro sea una conversación clara y no un trámite confuso.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contacto" id="contacto">
+    <div class="section-inner">
+      <div class="section-head">
+        <h2>Conversemos sobre tu seguro</h2>
+        <p>Escríbeme directamente o deja tus datos y te contacto a la brevedad.</p>
+      </div>
+
+      <div class="contacto-grid">
+        <form class="contact-form" id="contact-form" novalidate>
+          <input type="hidden" name="subject" value="Nuevo contacto desde montalvoseguros.com.pe">
+          <input type="hidden" name="from_name" value="Formulario Web - Montalvo Seguros">
+          <!--
+            El access_key de Web3Forms está pensado para ser público: solo autoriza
+            el envío de formularios hacia la cuenta asociada, no otorga lectura ni
+            control de la cuenta. Reemplaza el valor por tu access_key real de
+            https://web3forms.com antes de publicar el sitio.
+          -->
+          <input type="hidden" name="access_key" value="TU_ACCESS_KEY_DE_WEB3FORMS">
+
+          <div class="form-field">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+            <span class="field-error" id="error-nombre" role="alert"></span>
+          </div>
+
+          <div class="form-field">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+            <span class="field-error" id="error-email" role="alert"></span>
+          </div>
+
+          <div class="form-field">
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" autocomplete="tel" required>
+            <span class="field-error" id="error-telefono" role="alert"></span>
+          </div>
+
+          <div class="form-field">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" rows="4" required></textarea>
+            <span class="field-error" id="error-mensaje" role="alert"></span>
+          </div>
+
+          <div class="honeypot-field" aria-hidden="true">
+            <label for="empresa_web">No llenar este campo</label>
+            <input type="text" id="empresa_web" name="empresa_web" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="btn-submit" id="btn-submit">Enviar mensaje</button>
+          <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="contact-direct">
+          <a href="https://wa.me/51991472352" target="_blank" rel="noopener noreferrer" class="direct-whatsapp">
+            <svg viewBox="0 0 24 24" class="icon-whatsapp" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.29-.15-1.71-.84-1.97-.94-.27-.1-.46-.15-.66.15-.19.29-.75.94-.92 1.13-.17.19-.34.22-.63.07-.29-.15-1.22-.45-2.32-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.66-1.59-.9-2.18-.24-.57-.48-.49-.66-.5h-.56c-.19 0-.51.07-.78.36-.27.29-1.02 1-1.02 2.43 0 1.43 1.04 2.82 1.19 3.01.15.19 2.05 3.13 4.97 4.39.69.3 1.23.48 1.65.61.69.22 1.32.19 1.82.11.55-.08 1.71-.7 1.95-1.37.24-.68.24-1.26.17-1.38-.07-.12-.26-.19-.55-.34z"/><path fill="currentColor" d="M12.02 2C6.5 2 2.02 6.48 2.02 12c0 1.87.5 3.62 1.44 5.13L2 22l4.98-1.4A9.96 9.96 0 0 0 12.02 22C17.53 22 22 17.52 22 12S17.53 2 12.02 2zm0 18.11c-1.68 0-3.29-.46-4.69-1.32l-.34-.2-3 .84.8-2.94-.22-.35A8.1 8.1 0 0 1 3.9 12c0-4.48 3.65-8.12 8.12-8.12S20.14 7.52 20.14 12s-3.65 8.11-8.12 8.11z"/></svg>
+            <span>
+              <strong>991 472 352</strong>
+              <em>Respuesta directa por WhatsApp</em>
+            </span>
+          </a>
+
+          <dl class="contact-list">
+            <div>
+              <dt>Teléfono fijo</dt>
+              <dd><a href="tel:0834422027">083-422027</a></dd>
+            </div>
+            <div>
+              <dt>Correo</dt>
+              <dd><a href="mailto:andresmontalvoseguros@gmail.com">andresmontalvoseguros@gmail.com</a></dd>
+            </div>
+          </dl>
+
+          <div class="contact-locations">
+            <div class="location">
+              <h3>Lima</h3>
+              <p>Av. Simón Bolívar 166, Pueblo Libre</p>
+            </div>
+            <div class="location">
+              <h3>Andahuaylas</h3>
+              <p>Av. Perú 378</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <img src="assets/img/logo-blanco.png" alt="Andrés Montalvo Chero, corredor de seguros" class="footer-logo" loading="lazy">
+
+    <nav class="footer-nav">
+      <a href="#inicio">Inicio</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#nosotros">Quiénes somos</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+
+    <a href="https://instagram.com/andresmontalvoseguros" target="_blank" rel="noopener noreferrer" class="footer-social" aria-label="Andrés Montalvo Chero en Instagram">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c-2.72 0-3.06.01-4.12.06-1.06.05-1.79.22-2.43.47-.66.26-1.22.6-1.77 1.15-.55.55-.9 1.11-1.15 1.77-.25.64-.42 1.37-.47 2.43C2.01 8.94 2 9.28 2 12s.01 3.06.06 4.12c.05 1.06.22 1.79.47 2.43.26.66.6 1.22 1.15 1.77.55.55 1.11.9 1.77 1.15.64.25 1.37.42 2.43.47C8.94 21.99 9.28 22 12 22s3.06-.01 4.12-.06c1.06-.05 1.79-.22 2.43-.47.66-.26 1.22-.6 1.77-1.15.55-.55.9-1.11 1.15-1.77.25-.64.42-1.37.47-2.43.05-1.06.06-1.4.06-4.12s-.01-3.06-.06-4.12c-.05-1.06-.22-1.79-.47-2.43a4.9 4.9 0 0 0-1.15-1.77 4.9 4.9 0 0 0-1.77-1.15c-.64-.25-1.37-.42-2.43-.47C15.06 2.01 14.72 2 12 2zm0 1.8c2.67 0 2.99.01 4.04.06.98.04 1.5.21 1.86.35.47.18.8.4 1.15.75.35.35.57.68.75 1.15.14.36.31.88.35 1.86.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.98-.21 1.5-.35 1.86-.18.47-.4.8-.75 1.15-.35.35-.68.57-1.15.75-.36.14-.88.31-1.86.35-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.98-.04-1.5-.21-1.86-.35a3.1 3.1 0 0 1-1.15-.75 3.1 3.1 0 0 1-.75-1.15c-.14-.36-.31-.88-.35-1.86-.05-1.05-.06-1.37-.06-4.04s.01-2.99.06-4.04c.04-.98.21-1.5.35-1.86.18-.47.4-.8.75-1.15.35-.35.68-.57 1.15-.75.36-.14.88-.31 1.86-.35 1.05-.05 1.37-.06 4.04-.06z"/><path fill="currentColor" d="M12 7.35A4.65 4.65 0 1 0 16.65 12 4.65 4.65 0 0 0 12 7.35zm0 7.65a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm4.84-7.84a1.09 1.09 0 1 1-1.09-1.09 1.09 1.09 0 0 1 1.09 1.09z"/></svg>
+      <span>@andresmontalvoseguros</span>
+    </a>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; <span id="year"></span> Andrés Montalvo Chero. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script src="assets/js/script.js"></script>
+</body>
+</html>
+</file>
+
+</files>

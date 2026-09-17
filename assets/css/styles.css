@@ -1,0 +1,1792 @@
+/* ==========================================================================
+   Andrés Montalvo Chero — Corredor de Seguros
+   Editorial corporativo: bloques de color sólido alternados, retícula
+   asimétrica, líneas divisorias finas. Sin tarjetas, sin flechas, sin
+   precios, sin estadísticas aisladas. Animaciones con intención, no
+   decorativas: se respetan bajo prefers-reduced-motion.
+   ========================================================================== */
+
+:root {
+  /* Paleta de marca */
+  --azul-marca: #0A3E84;
+  --azul-marino: #06264F;
+  --hueso: #F7F5F0;
+  --blanco: #FFFFFF;
+  --verde-whatsapp: #25D366;
+  --verde-whatsapp-hover: #1EBE59;
+  --naranja-marca: #E8871E;
+  --texto-oscuro: #1F2430;
+  --error: #B3261E;
+
+  /* Gris auxiliar para texto secundario sobre fondo claro (no forma parte
+     de la paleta de marca, evita usar negro puro en párrafos largos) */
+  --texto-muted: #454C5E;
+
+  /* Tipografía */
+  --font-titulares: 'Fraunces', Georgia, serif;
+  --font-cuerpo: 'Work Sans', Arial, sans-serif;
+
+  /* Layout */
+  --container-max: 1220px;
+  --container-pad: 1.75rem;
+  --header-height: 84px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Reset y base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-height);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-cuerpo);
+  color: var(--texto-oscuro);
+  background: var(--hueso);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: opacity 0.2s var(--ease);
+}
+
+body.is-leaving {
+  opacity: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-titulares);
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--azul-marca);
+  color: var(--hueso);
+  padding: 0.75rem 1.25rem;
+  z-index: 200;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--azul-marca);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--naranja-marca);
+  color: var(--blanco);
+}
+
+/* Sobre fondos oscuros, el foco en azul-marca no es legible: se cambia a
+   hueso, que mantiene un contraste alto en ambas direcciones. */
+.hero-copy :focus-visible,
+.site-footer :focus-visible,
+.about-masthead :focus-visible,
+.notfound :focus-visible {
+  outline-color: var(--hueso);
+}
+
+/* .nav-menu solo tiene fondo azul-marino (y por lo tanto necesita foco
+   claro) cuando actúa como panel de pantalla completa en mobile. En
+   desktop se aplana a "background: none" sobre el header claro, así que
+   el foco debe volver a azul-marca ahí; de lo contrario un foco hueso
+   quedaría invisible sobre el header hueso. */
+@media (max-width: 859.98px) {
+  .nav-menu :focus-visible {
+    outline-color: var(--hueso);
+  }
+}
+
+/* Transición breve al cambiar de idioma: el contenido se desvanece,
+   el texto se reemplaza mientras es invisible, y vuelve a aparecer.
+   Se omite bajo prefers-reduced-motion (el cambio es instantáneo). */
+body.lang-fade {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Barra de progreso de scroll: se inyecta desde script.js, por encima
+   del header (que tiene z-index:100) pero sin formar parte de él, así
+   que sigue visible incluso cuando el header se oculta al bajar. */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--naranja-marca);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 150;
+  pointer-events: none;
+}
+
+/* Grano sutil sobre los bloques de color sólido (azul-marca / azul-marino).
+   SVG de ruido (feTurbulence) como pseudo-elemento, con mix-blend-mode para
+   que se perciba como textura de superficie y no como una capa aparte.
+   pointer-events: none es obligatorio porque estos bloques contienen
+   botones y links reales. */
+.hero-copy,
+.site-footer,
+.about-masthead,
+.notfound {
+  position: relative;
+}
+
+.hero-copy::after,
+.nav-menu::after,
+.site-footer::after,
+.about-masthead::after,
+.notfound::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.section-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 5.5rem var(--container-pad);
+}
+
+.section-head {
+  max-width: 38rem;
+  margin-bottom: 3.5rem;
+}
+
+.section-head h2 {
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  color: var(--azul-marino);
+  margin-bottom: 0.9rem;
+}
+
+.section-head p {
+  font-size: 1.05rem;
+  color: var(--texto-muted);
+}
+
+/* Link de texto con subrayado que se dibuja de izquierda a derecha */
+.text-link {
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--azul-marca);
+  width: fit-content;
+}
+
+.text-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease);
+}
+
+.text-link:hover::after,
+.text-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.text-link-light {
+  color: var(--hueso);
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  background: rgba(247, 245, 240, 0.98);
+  border-bottom: 1px solid rgba(6, 38, 79, 0.12);
+  transition: transform 0.28s var(--ease);
+}
+
+.site-header.header-hidden {
+  transform: translateY(-100%);
+}
+
+/* El logo vive fuera de .header-inner a propósito: .header-inner está
+   centrado con max-width y padding a ambos lados (igual que el resto de
+   secciones), así que cualquier elemento dentro de él hereda ese espacio
+   en blanco a la izquierda. El logo necesita ignorar esa regla y tocar
+   x=0 del viewport sin importar el ancho de pantalla, así que se
+   posiciona de forma absoluta contra .site-header (que ya es la caja
+   contenedora por ser position:sticky) en vez de vivir en el flujo del
+   contenedor centrado. */
+.brand {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.brand-logo {
+  height: 42px;
+  width: auto;
+  display: block;
+}
+
+.header-inner {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding-right: var(--container-pad);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.nav-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 110;
+}
+
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  width: 26px;
+  margin: 0 auto;
+  background: var(--azul-marino);
+  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.nav-menu {
+  position: fixed;
+  inset: 0;
+  background: var(--azul-marino);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.75rem;
+  padding: 2rem 2rem;
+  transform: translateX(100%);
+  transition: transform 0.35s var(--ease);
+  z-index: 105;
+}
+
+.nav-menu.is-open {
+  transform: translateX(0);
+}
+
+.nav-link {
+  position: relative;
+  font-size: 1.5rem;
+  font-family: var(--font-titulares);
+  color: var(--hueso);
+  letter-spacing: 0.02em;
+}
+
+.nav-link[aria-current="page"],
+.nav-link.is-active {
+  color: var(--naranja-marca);
+}
+
+/* Botón de idioma: mismo tratamiento tipográfico que el resto del panel
+   de navegación, pero como control secundario (borde, no relleno). */
+.lang-toggle {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  border: 1.5px solid var(--hueso);
+  background: none;
+  color: var(--hueso);
+  font-family: var(--font-cuerpo);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.lang-toggle:hover {
+  background: var(--hueso);
+  color: var(--azul-marino);
+}
+
+/* Solo ícono: el hero ya tiene el botón de WhatsApp con texto como
+   acción principal, así que repetir "WhatsApp" en el header es
+   redundante en la misma pantalla inicial. Este queda como acceso
+   rápido y discreto para cuando el hero ya salió de vista. */
+.nav-cta {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--verde-whatsapp);
+  color: var(--azul-marino);
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.nav-cta:hover {
+  background: var(--verde-whatsapp-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -8px rgba(6, 38, 79, 0.35);
+}
+
+.nav-cta svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* --------------------------------------------------------------------------
+   Hero — split-screen: bloque de texto sólido + fotografía a sangre
+   -------------------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  /* El azul vive acá (no en .hero-copy) para que, en desktop, el recorte
+     diagonal de .hero-photo deje ver este mismo fondo en la muesca en
+     vez de dejar un hueco. */
+  background: var(--azul-marca);
+}
+
+.hero-copy {
+  padding: 4.5rem var(--container-pad) 3.5rem calc(var(--container-pad) + 1rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero-byline {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-titulares);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  color: rgba(247, 245, 240, 0.78);
+  margin-bottom: 1.6rem;
+  max-width: 26rem;
+}
+
+.hero-byline-icon {
+  height: 19px;
+  width: auto;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.hero-title {
+  font-size: clamp(2.1rem, 4.4vw, 2.6rem);
+  font-weight: 500;
+  color: var(--hueso);
+  margin-bottom: 1.5rem;
+  max-width: 24rem;
+}
+
+.hero-title-line {
+  display: block;
+}
+
+.hero-subtitle {
+  font-size: 1.08rem;
+  color: rgba(247, 245, 240, 0.85);
+  max-width: 26rem;
+  margin-bottom: 2.2rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.3rem;
+}
+
+.hero-link {
+  color: var(--hueso);
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--verde-whatsapp);
+  color: var(--azul-marino);
+  font-weight: 600;
+  font-size: 1.02rem;
+  padding: 0.95rem 1.75rem;
+  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.btn-whatsapp:hover {
+  background: var(--verde-whatsapp-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.35);
+}
+
+.icon-whatsapp {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.hero-photo {
+  height: 46vh;
+  min-height: 280px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Envoltorio interno con holgura extra (116% de alto, centrado) para que
+   el Ken Burns (zoom) y el parallax de scroll tengan margen de sobra para
+   moverse sin dejar ver los bordes de la imagen. El recorte diagonal en
+   desktop vive en .hero-photo (el "marco" estable); el zoom y el
+   parallax se aplican a elementos distintos dentro de ese marco para que
+   ninguna de las dos animaciones se pisen (ambas tocarían "transform"
+   del mismo elemento si no se separaran). */
+.hero-photo-inner {
+  position: absolute;
+  top: -8%;
+  left: 0;
+  right: 0;
+  height: 116%;
+  will-change: transform;
+}
+
+.hero-photo-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+  display: block;
+}
+
+/* Transición suave entre el bloque de texto y la foto: en mobile el hero
+   se apila (texto arriba, foto abajo), así que el degradado es vertical,
+   en la unión superior de la foto. En desktop pasa a horizontal, en el
+   borde izquierdo, donde la foto se junta con la columna de texto, y
+   sigue el mismo corte diagonal que .hero-photo (al ser un pseudo-
+   elemento suyo, el clip-path del padre también lo recorta). */
+.hero-photo::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: linear-gradient(to bottom, var(--azul-marca), transparent);
+  pointer-events: none;
+}
+
+/* Indicador de scroll: línea delgada centrada al pie del hero. Es un
+   link real a #cobertura-resumen (no JS) para heredar automáticamente
+   el scroll-behavior:smooth global y su respeto por
+   prefers-reduced-motion a nivel de navegador. El drop-shadow oscuro
+   mantiene la línea clara legible sin importar qué tan clara sea la
+   zona de la foto que quede detrás. */
+.hero-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 1.6rem;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.hero-scroll-cue-line {
+  width: 1px;
+  height: 28px;
+  background: var(--hueso);
+  filter: drop-shadow(0 1px 3px rgba(6, 38, 79, 0.55));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-scroll-cue-line {
+    animation: respirar 2s ease-in-out infinite;
+  }
+}
+
+@keyframes respirar {
+  0%, 100% {
+    opacity: 0.45;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(4px);
+  }
+}
+
+/* Entrada orquestada del hero: un solo momento, al cargar la página. El
+   titular entra línea por línea (cada .hero-title-line con su propio
+   delay, ~90ms de diferencia) y el subtítulo/botón esperan a que esa
+   secuencia esté en marcha antes de aparecer. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-byline,
+  .hero-title-line,
+  .hero-subtitle,
+  .hero-actions {
+    opacity: 0;
+    animation: subir 0.7s var(--ease) forwards;
+  }
+
+  /* .hero-title-line no lleva animation-delay fijo acá: script.js divide
+     el titular en sus líneas visuales reales (dependen del idioma y del
+     ancho de columna) y asigna el desfase de cada una por JS, además de
+     empujar el delay de subtítulo/botón según cuántas líneas resultaron.
+     Los valores de acá son solo el respaldo por si JS no llega a correr. */
+  .hero-byline { animation-delay: 0.05s; }
+  .hero-subtitle { animation-delay: 0.34s; }
+  .hero-actions { animation-delay: 0.46s; }
+
+  /* Aparición al cargar (opacidad) y Ken Burns (zoom continuo) viven en
+     elementos distintos (ver comentario de .hero-photo-inner arriba), así
+     que no compiten por la propiedad transform. */
+  .hero-photo-inner img {
+    opacity: 0;
+    animation-name: aparecer, kenburns;
+    animation-duration: 0.9s, 23s;
+    animation-timing-function: var(--ease), ease-in-out;
+    animation-delay: 0.2s, 0s;
+    animation-iteration-count: 1, infinite;
+    animation-direction: normal, alternate;
+    animation-fill-mode: forwards, none;
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Franja de resumen de coberturas — puramente informativa, sin clic. Los
+   8 servicios en una sola línea de texto para que se entienda de un
+   vistazo qué se cubre, sin tener que interactuar con el índice de abajo.
+   -------------------------------------------------------------------------- */
+
+.cobertura-resumen {
+  background: var(--blanco);
+}
+
+.cobertura-resumen .section-inner {
+  padding-top: 1.75rem;
+  padding-bottom: 1.75rem;
+}
+
+.cobertura-resumen-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-family: var(--font-cuerpo);
+  font-size: 1.02rem;
+  font-weight: 500;
+  color: var(--azul-marino);
+}
+
+.cobertura-resumen-list li {
+  position: relative;
+  padding: 0.35rem 1rem;
+}
+
+.cobertura-resumen-list li:first-child {
+  padding-left: 0.35rem;
+}
+
+.cobertura-resumen-list li:not(:first-child)::before {
+  content: '\00B7';
+  position: absolute;
+  left: -0.05rem;
+  color: rgba(6, 38, 79, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Cómo trabajamos — 4 puntos concretos, sin cajas ni sombras.
+   -------------------------------------------------------------------------- */
+
+.como-trabajamos {
+  background: var(--hueso);
+}
+
+.como-trabajamos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+.como-trabajamos-item h3 {
+  font-family: var(--font-titulares);
+  font-size: 1.25rem;
+  color: var(--azul-marino);
+  margin-bottom: 0.65rem;
+}
+
+.como-trabajamos-item p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--texto-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Servicios — editorial, retícula asimétrica, contenido educativo
+   -------------------------------------------------------------------------- */
+
+.servicios {
+  background: var(--blanco);
+}
+
+.servicios .section-inner {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+/* Índice + panel de lectura, estilo editorial (Aon-like). En mobile la
+   lista se comporta como acordeón simple (un panel se despliega justo
+   debajo de su nombre, técnica grid-template-rows). En desktop, el
+   nombre seleccionado solo cambia de color/peso y el panel de la
+   derecha muestra su contenido con un fundido suave. */
+
+/* Contenedor de posicionamiento para la barra de acento deslizante (ver
+   .servicios-accent-bar): JS mueve la barra con translateY según la
+   posición real del item activo dentro de esta caja. */
+.servicios-list-wrap {
+  position: relative;
+  border-top: 1px solid rgba(6, 38, 79, 0.16);
+}
+
+/* Los 8 servicios se agrupan en dos categorías plegables ("Para ti" /
+   "Para tu empresa") para que la lista no abrume de entrada: la mayoría
+   de visitantes solo necesita la primera, así que arranca abierta,
+   mientras la de empresa arranca cerrada. Reusa la misma técnica de
+   "cortina" (grid-template-rows 0fr → 1fr) que ya usa el acordeón móvil
+   de cada servicio individual, así que ambos niveles de colapso se
+   sienten consistentes entre sí.
+   El borde inferior del encabezado (no uno por grupo) separa cada
+   categoría de lo que sigue tanto abierta como cerrada, sin duplicarse
+   con el borde del último item cuando el grupo está expandido. */
+.servicio-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.1rem 0.25rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(6, 38, 79, 0.16);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* El encabezado de categoría es el elemento más prominente de la lista
+   -Fraunces, tamaño grande- porque es el nivel jerárquico "padre"; los
+   nombres de servicio individuales (.servicio-name) son notoriamente más
+   chicos y van indentados, para que se lean como "hijos" de esta
+   categoría y no como elementos del mismo nivel. */
+.servicio-group-title {
+  font-family: var(--font-titulares);
+  font-size: clamp(1.55rem, 2.4vw, 1.9rem);
+  font-weight: 600;
+  color: var(--azul-marino);
+}
+
+.servicio-group-chevron {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--azul-marino);
+  transition: transform 0.25s var(--ease);
+}
+
+.servicio-group-header[aria-expanded="true"] .servicio-group-chevron {
+  transform: rotate(180deg);
+}
+
+.servicio-group-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .servicio-group-panel {
+    transition: grid-template-rows 0.3s var(--ease);
+  }
+}
+
+.servicio-group.is-open .servicio-group-panel {
+  grid-template-rows: 1fr;
+}
+
+.servicio-group-panel-inner {
+  overflow: hidden;
+}
+
+.servicio-item {
+  border-bottom: 1px solid rgba(6, 38, 79, 0.16);
+}
+
+.servicio-trigger {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  /* Antes 1.15rem: la lista de 8 servicios ocupaba casi toda la
+     pantalla. La barra de acento ya marca la selección por sí sola, así
+     que no hace falta tanto aire para que se lea como un índice.
+     padding-left mayor que el del encabezado de categoría (0.25rem):
+     ese desnivel es lo que hace que el servicio se perciba como hijo
+     indentado bajo su categoría, no como un elemento del mismo nivel. */
+  padding: 0.75rem 0.25rem 0.75rem 0.9rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.servicio-name {
+  font-family: var(--font-titulares);
+  font-size: clamp(1.05rem, 1.3vw, 1.2rem);
+  font-weight: 500;
+  color: var(--azul-marino);
+  transition: color 0.2s var(--ease);
+}
+
+.servicio-trigger:hover .servicio-name,
+.servicio-trigger:focus-visible .servicio-name {
+  color: var(--azul-marca);
+}
+
+.servicio-item.is-active .servicio-name {
+  color: var(--azul-marca);
+  font-weight: 700;
+}
+
+/* Barra de acento: un solo elemento compartido (no uno por item) para
+   que JS pueda animarlo con translateY entre posiciones — así se ve
+   como un indicador que se desliza, no que aparece/desaparece. Solo
+   tiene sentido en desktop, donde vive junto al panel de lectura (ver
+   media query de 860px). */
+.servicios-accent-bar {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 0;
+  background: var(--naranja-marca);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .servicios-accent-bar {
+    transition: transform 0.3s var(--ease), height 0.3s var(--ease);
+  }
+}
+
+/* Panel inline: solo se usa en mobile (ver media query de 860px, donde
+   se desactiva a favor del panel de lectura compartido). */
+.servicio-panel-mobile {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .servicio-panel-mobile {
+    transition: grid-template-rows 0.3s var(--ease);
+  }
+}
+
+.servicio-item.is-open .servicio-panel-mobile {
+  grid-template-rows: 1fr;
+}
+
+.servicio-panel-mobile-inner {
+  overflow: hidden;
+}
+
+.servicio-panel-mobile-inner p {
+  padding: 0 0.25rem 1.5rem;
+  color: var(--texto-muted);
+  font-size: 1.02rem;
+  line-height: 1.6;
+  max-width: 38rem;
+}
+
+/* Panel de lectura compartido (solo desktop, ver media query). */
+.servicios-reading {
+  display: none;
+  position: relative;
+  /* Recorta el número gigante de fondo para que nunca se salga del
+     panel ni pise contenido de otras secciones. */
+  overflow: hidden;
+}
+
+/* Número gigante de fondo: puramente decorativo, nunca debe competir
+   con el texto real (por eso vive detrás, con z-index bajo, opacidad
+   mínima, y aria-hidden). Cambia junto con .servicios-reading-content
+   porque ambos son hijos directos del mismo panel: al desvanecerse
+   .servicios-reading entero (.is-fading), el número se desvanece con el
+   resto, y el valor ya está actualizado cuando reaparece. */
+.servicios-reading-number {
+  position: absolute;
+  top: -0.35em;
+  right: -0.15em;
+  z-index: 0;
+  font-family: var(--font-titulares);
+  font-size: clamp(120px, 13vw, 190px);
+  line-height: 1;
+  color: rgba(10, 62, 132, 0.07);
+  pointer-events: none;
+  user-select: none;
+}
+
+.servicios-reading-content {
+  position: relative;
+  z-index: 1;
+}
+
+.servicios-reading-name {
+  font-family: var(--font-titulares);
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  color: var(--azul-marino);
+  margin: 0 0 1.1rem;
+}
+
+.servicios-reading-text {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--texto-muted);
+  max-width: 36rem;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Alianzas institucionales — nota breve, no una sección mayor. Blanco
+   como servicios (se lee como cierre de esa misma idea) en vez de hueso
+   como testimonios (que necesita distinguirse como bloque aparte, ver
+   comentario más abajo). Una sola línea fina arriba basta para separarla
+   de la lista de servicios, sin caja ni sombra.
+   -------------------------------------------------------------------------- */
+
+.alianzas {
+  background: var(--blanco);
+}
+
+.alianzas .section-inner {
+  padding-top: 0;
+  padding-bottom: 4rem;
+}
+
+.alianzas-content {
+  max-width: 42rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(6, 38, 79, 0.16);
+}
+
+.alianzas-content h2 {
+  font-family: var(--font-titulares);
+  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+  color: var(--azul-marino);
+  margin: 0 0 1rem;
+}
+
+.alianzas-content p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--texto-muted);
+  margin: 0 0 1.25rem;
+}
+
+.alianzas-nombre {
+  font-weight: 600;
+  color: var(--azul-marca);
+}
+
+/* --------------------------------------------------------------------------
+   Testimonios — texto editorial, no capturas de pantalla. Las citas son
+   transcripción literal de reseñas reales de Facebook; el único adorno
+   es la tipografía. Mismo lenguaje visual que la sección de servicios:
+   líneas finas entre elementos, sin cajas ni sombras.
+   -------------------------------------------------------------------------- */
+
+/* Hueso (servicios ahora es blanco) para que el cambio de sección se
+   perciba claramente al hacer scroll, en vez de que ambas se lean como
+   un solo bloque continuo. */
+.testimonios {
+  background: var(--hueso);
+}
+
+.testimonios blockquote,
+.testimonios figure {
+  margin: 0;
+}
+
+/* Matriz 2x2: 1 columna en mobile, 2 columnas x 2 filas desde tablet,
+   con líneas finas como únicos separadores (sin cajas, sin sombras). */
+.testimonios-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 1px solid rgba(6, 38, 79, 0.14);
+  margin-bottom: 2.25rem;
+}
+
+.testimonio-card {
+  padding: 1.75rem 0;
+  border-bottom: 1px solid rgba(6, 38, 79, 0.14);
+}
+
+.testimonio-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.testimonio-name {
+  font-weight: 600;
+  color: var(--azul-marino);
+}
+
+/* Facebook no usa estrellas para este tipo de reseña ("recomienda" es
+   binario): el check replica exactamente ese dato real, nada inventado. */
+.testimonio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--texto-muted);
+  white-space: nowrap;
+}
+
+.testimonio-check {
+  color: var(--azul-marino);
+  font-weight: 700;
+}
+
+.testimonio-card blockquote p {
+  font-family: var(--font-titulares);
+  font-size: 1.15rem;
+  line-height: 1.4;
+  color: var(--azul-marino);
+  margin: 0;
+}
+
+.testimonios-footer {
+  text-align: center;
+  color: var(--texto-muted);
+  font-size: 0.98rem;
+}
+
+.testimonios-footer .text-link {
+  margin-left: 0.3rem;
+}
+
+/* --------------------------------------------------------------------------
+   Botón naranja — reutilizado por el botón "Volver al inicio" de 404.html.
+   -------------------------------------------------------------------------- */
+
+.btn-naranja {
+  display: inline-flex;
+  align-items: center;
+  background: var(--naranja-marca);
+  color: var(--azul-marino);
+  font-weight: 600;
+  font-size: 1.02rem;
+  padding: 0.95rem 1.75rem;
+  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
+  transition: filter 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.btn-naranja:hover {
+  filter: brightness(0.92);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.35);
+}
+
+/* El foco en hueso (heredado de .notfound :focus-visible en 404.html) no
+   es legible sobre el propio fondo naranja del botón: aquí se necesita
+   azul-marino. */
+.btn-naranja:focus-visible {
+  outline-color: var(--azul-marino);
+}
+
+/* --------------------------------------------------------------------------
+   Contacto — formulario con floating labels
+   -------------------------------------------------------------------------- */
+
+.contacto {
+  background: var(--blanco);
+}
+
+.contacto .section-inner {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.contacto .section-head {
+  margin-bottom: 2rem;
+}
+
+.contacto-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-field {
+  position: relative;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  font-family: var(--font-cuerpo);
+  font-size: 1rem;
+  padding: 1.1rem 0.9rem 0.4rem;
+  border: 1px solid rgba(6, 38, 79, 0.3);
+  background: var(--blanco);
+  color: var(--texto-oscuro);
+  transition: border-color 0.2s var(--ease);
+}
+
+.form-field textarea {
+  padding-top: 1.2rem;
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.form-field label {
+  position: absolute;
+  left: 0.95rem;
+  top: 0.85rem;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: var(--texto-muted);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 0.2s var(--ease), color 0.2s var(--ease), top 0.2s var(--ease);
+  background: var(--blanco);
+  padding: 0 0.2rem;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: var(--azul-marca);
+}
+
+.form-field input:focus + label,
+.form-field input:not(:placeholder-shown) + label,
+.form-field textarea:focus + label,
+.form-field textarea:not(:placeholder-shown) + label {
+  top: -0.5rem;
+  font-size: 0.75rem;
+  color: var(--azul-marca);
+}
+
+.form-field.has-error input,
+.form-field.has-error textarea {
+  border-color: var(--error);
+}
+
+.field-error {
+  display: block;
+  color: var(--error);
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  min-height: 1.1em;
+}
+
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.btn-submit {
+  align-self: flex-start;
+  background: var(--azul-marca);
+  color: var(--hueso);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.75rem;
+  border: none;
+  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.btn-submit:hover {
+  background: var(--azul-marino);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.35);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-status {
+  font-size: 0.95rem;
+  min-height: 1.2em;
+}
+
+.form-status.is-success {
+  color: #1E7A3D;
+}
+
+.form-status.is-error {
+  color: var(--error);
+}
+
+.contact-direct {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.direct-info {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(6, 38, 79, 0.14);
+}
+
+.direct-info:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.direct-info h3 {
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  color: var(--texto-muted);
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+.direct-info p {
+  font-size: 1.08rem;
+  color: var(--azul-marino);
+  font-weight: 600;
+}
+
+.direct-info p + p {
+  margin-top: 0.2rem;
+}
+
+.direct-info a:hover {
+  color: var(--azul-marca);
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer {
+  background: var(--azul-marca);
+  color: var(--hueso);
+  border-top: 1px solid rgba(247, 245, 240, 0.15);
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  padding-top: 3.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.footer-logo {
+  height: 40px;
+  width: auto;
+  margin-bottom: 0.2rem;
+}
+
+.footer-tagline {
+  font-size: 0.95rem;
+  color: rgba(247, 245, 240, 0.7);
+  max-width: 22rem;
+}
+
+.footer-col-title {
+  font-family: var(--font-cuerpo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(247, 245, 240, 0.5);
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.footer-links a {
+  color: rgba(247, 245, 240, 0.85);
+  font-size: 0.98rem;
+}
+
+.footer-links a:hover {
+  color: var(--hueso);
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--hueso);
+  font-weight: 500;
+}
+
+.footer-social:hover {
+  color: rgba(247, 245, 240, 0.8);
+}
+
+.footer-social svg {
+  width: 22px;
+  height: 22px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(247, 245, 240, 0.18);
+}
+
+.footer-bottom p {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 1.25rem var(--container-pad);
+  font-size: 0.85rem;
+  color: rgba(247, 245, 240, 0.65);
+}
+
+/* --------------------------------------------------------------------------
+   Sobre nosotros — masthead + navegación lateral numerada
+   -------------------------------------------------------------------------- */
+
+.about-masthead {
+  background: var(--azul-marca);
+  color: var(--hueso);
+}
+
+.about-masthead .section-inner {
+  padding-bottom: 3.5rem;
+}
+
+.about-masthead h1 {
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
+  color: var(--hueso);
+  margin-bottom: 1rem;
+}
+
+.about-masthead p {
+  font-size: 1.1rem;
+  color: rgba(247, 245, 240, 0.85);
+  max-width: 32rem;
+}
+
+.about-body {
+  background: var(--hueso);
+}
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+.about-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.about-nav a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  font-size: 0.98rem;
+  color: var(--texto-muted);
+  font-weight: 500;
+  transition: color 0.2s var(--ease);
+}
+
+.about-nav-number {
+  font-family: var(--font-titulares);
+  font-size: 0.85rem;
+  color: rgba(6, 38, 79, 0.4);
+}
+
+.about-nav a:hover,
+.about-nav a.is-active {
+  color: var(--azul-marca);
+}
+
+.about-nav a.is-active .about-nav-number {
+  color: var(--azul-marca);
+}
+
+.about-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.about-section {
+  scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(6, 38, 79, 0.14);
+}
+
+.about-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.about-section h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  font-size: clamp(1.5rem, 3.5vw, 1.9rem);
+  color: var(--azul-marino);
+  margin-bottom: 1.3rem;
+}
+
+.about-section-number {
+  font-size: 0.95rem;
+  color: var(--naranja-marca);
+}
+
+.about-section p {
+  font-size: 1.05rem;
+  color: var(--texto-muted);
+  max-width: 42rem;
+}
+
+.about-section p + p {
+  margin-top: 1.1rem;
+}
+
+.counter {
+  font-family: var(--font-titulares);
+  font-weight: 600;
+  color: var(--azul-marino);
+  font-variant-numeric: tabular-nums;
+}
+
+.about-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.about-reason h3 {
+  font-size: 1.1rem;
+  color: var(--azul-marino);
+  margin-bottom: 0.4rem;
+}
+
+.about-reason p {
+  font-size: 1.02rem;
+  color: var(--texto-muted);
+  max-width: 40rem;
+}
+
+.coverage-list {
+  margin-top: 1.4rem;
+  font-family: var(--font-titulares);
+  font-size: 1.1rem;
+  color: var(--azul-marino);
+  letter-spacing: 0.01em;
+}
+
+.coverage-list span {
+  color: var(--naranja-marca);
+  margin: 0 0.3rem;
+}
+
+/* --------------------------------------------------------------------------
+   Página 404
+   -------------------------------------------------------------------------- */
+
+.notfound {
+  background: var(--azul-marca);
+  color: var(--hueso);
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
+.notfound-inner {
+  max-width: 32rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.notfound-eyebrow {
+  font-size: 1rem;
+  color: rgba(247, 245, 240, 0.65);
+  margin-bottom: 1.2rem;
+}
+
+.notfound-title {
+  font-size: clamp(2.1rem, 5vw, 2.9rem);
+  color: var(--hueso);
+  margin-bottom: 1.2rem;
+}
+
+.notfound-text {
+  font-size: 1.08rem;
+  color: rgba(247, 245, 240, 0.85);
+  margin-bottom: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   Media queries
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 700px) {
+  .como-trabajamos-grid {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2.5rem;
+  }
+
+  .contacto-grid {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+
+  .footer-columns {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .testimonios-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .testimonio-card:nth-child(odd) {
+    padding-right: 2rem;
+    border-right: 1px solid rgba(6, 38, 79, 0.14);
+  }
+
+  .testimonio-card:nth-child(even) {
+    padding-left: 2rem;
+  }
+
+  .about-reasons {
+    flex-direction: row;
+  }
+
+  .about-reason {
+    flex: 1;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 860px) {
+  .como-trabajamos-grid {
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 2rem;
+  }
+
+  .nav-toggle {
+    display: none;
+  }
+
+  .nav-menu {
+    position: static;
+    background: none;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    transform: none;
+    gap: 2rem;
+  }
+
+  /* El grano solo tiene sentido sobre el panel azul-marino a pantalla
+     completa de mobile; en desktop el nav queda transparente en línea. */
+  .nav-menu::after {
+    display: none;
+  }
+
+  .nav-link {
+    font-size: 1rem;
+    font-family: var(--font-cuerpo);
+    font-weight: 500;
+    color: var(--azul-marino);
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s var(--ease);
+  }
+
+  .nav-link:hover::after,
+  .nav-link[aria-current="page"]::after,
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .nav-link:hover {
+    color: var(--azul-marca);
+  }
+
+  .nav-link[aria-current="page"],
+  .nav-link.is-active {
+    color: var(--azul-marca);
+  }
+
+  .nav-cta {
+    margin-top: 0;
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-cta svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lang-toggle {
+    margin-top: 0;
+    border-color: var(--azul-marino);
+    color: var(--azul-marino);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .lang-toggle:hover {
+    background: var(--azul-marino);
+    color: var(--hueso);
+  }
+
+  .hero {
+    grid-template-columns: 35% 65%;
+    min-height: 620px;
+  }
+
+  .hero-copy {
+    padding: 0 3rem 0 8rem;
+    justify-content: center;
+  }
+
+  .hero-photo {
+    height: 100%;
+    min-height: 620px;
+    /* Corte en ángulo (~10°) en vez de la división recta: el borde
+       izquierdo arranca más adentro arriba y llega a x=0 abajo. Al ser
+       un clip-path sobre .hero-photo, también recorta su ::before (el
+       degradado) y a .hero-photo-inner, así que foto, degradado y zoom
+       quedan contenidos dentro del mismo corte diagonal. */
+    clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .hero-photo::before {
+    top: 0;
+    bottom: 0;
+    right: auto;
+    left: 0;
+    width: 220px;
+    height: auto;
+    background: linear-gradient(to right, var(--azul-marca), transparent);
+  }
+
+  .servicios-index {
+    display: grid;
+    /* fr, no %: 42%+58% ya suma el 100% del contenedor, y en CSS Grid el
+       gap se suma ENCIMA de esas pistas (no se resta de ellas) — con
+       porcentajes eso desbordaba el grid exactamente por el ancho del
+       gap (3.5rem), empujando el panel de lectura (y su texto) fuera del
+       viewport en pantallas angostas (~860-1024px). fr sí reparte el
+       espacio disponible DESPUÉS de descontar el gap, así que nunca
+       desborda, con la misma proporción 42:58. */
+    grid-template-columns: 42fr 58fr;
+    gap: 3.5rem;
+    /* La lista de 8 nombres es naturalmente más alta que el texto del
+       servicio seleccionado (que puede ser un solo párrafo corto). Con
+       "start" ese desnivel se veía como un vacío enorme debajo del
+       panel; centrando ambas columnas, el panel queda a media altura de
+       la lista en vez de pegado arriba con aire muerto abajo. */
+    align-items: center;
+  }
+
+  /* En desktop el nombre seleccionado ya se distingue en la lista (color +
+     peso), así que el panel inline dentro de cada item queda apagado a
+     favor del panel de lectura compartido de la derecha. */
+  .servicio-panel-mobile {
+    display: none;
+  }
+
+  .servicios-accent-bar {
+    display: block;
+  }
+
+  .servicios-reading {
+    display: block;
+    /* Amortigua el salto de altura entre servicios cortos (una sola
+       oración) y largos, sin forzar que el panel intente igualar el
+       alto completo de la lista de 8 nombres. */
+    min-height: 11rem;
+    padding-top: 0.5rem;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .servicios-reading {
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  }
+
+  .servicios-reading.is-fading {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .about-layout {
+    grid-template-columns: 200px 1fr;
+    align-items: start;
+  }
+
+  .about-nav {
+    position: sticky;
+    top: calc(var(--header-height) + 2.5rem);
+  }
+}
