@@ -198,6 +198,42 @@ body.lang-fade {
   padding: 5.5rem var(--container-pad);
 }
 
+/* Separación entre secciones. El corte se marca en tres capas que se
+   refuerzan entre sí, porque el contraste blanco/hueso por sí solo es
+   demasiado sutil para leerse como "acá empieza otra cosa":
+   1. Los fondos alternan sin repetirse nunca entre secciones vecinas
+      (blanco → hueso → blanco...), con el azul de marca puntuando el
+      hero, el teaser de "¿Quiénes somos?" y el footer.
+   2. Una línea fina cruza el ancho del contenedor al inicio de cada
+      sección marcada.
+   3. Sobre esa línea, una barra naranja corta reusa el mismo vocabulario
+      visual que la barra de acento del índice de servicios, para que el
+      corte se lea como parte del sistema del sitio y no como un
+      separador genérico.
+   .section-mark-dark es la misma marca sobre fondo azul, donde la línea
+   tiene que aclararse en vez de oscurecerse. */
+.section-mark {
+  border-top: 1px solid rgba(6, 38, 79, 0.12);
+}
+
+.section-mark-dark {
+  border-top-color: rgba(247, 245, 240, 0.2);
+}
+
+.section-mark > .section-inner {
+  position: relative;
+}
+
+.section-mark > .section-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--container-pad);
+  width: 56px;
+  height: 3px;
+  background: var(--naranja-marca);
+}
+
 .section-head {
   max-width: 38rem;
   margin-bottom: 3.5rem;
@@ -244,6 +280,80 @@ body.lang-fade {
 
 .text-link-light {
   color: var(--hueso);
+}
+
+/* Pastilla reutilizable para CTAs secundarios (alianzas, testimonios,
+   teaser de "quiénes somos"). La sombra vive en el elemento de afuera y el
+   recorte en el envoltorio interno: si ambos vivieran en el mismo
+   elemento, su propio overflow:hidden recortaría también la sombra (el
+   mismo reparto de responsabilidades que .servicio-group-panel/-inner).
+   Va siempre en blanco: las tres secciones donde vive (alianzas,
+   testimonios y el teaser) tienen fondo hueso o azul, así que el blanco es
+   el único tono que le da contraste en las tres por igual. */
+.btn-pill {
+  position: relative;
+  display: inline-flex;
+  border-radius: 999px;
+  background: var(--blanco);
+  color: var(--azul-marino);
+  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0.12);
+  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.btn-pill:hover,
+.btn-pill:focus-visible {
+  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.28);
+  transform: translateY(-2px);
+}
+
+.btn-pill-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-radius: inherit;
+  padding: 0.85rem 1.8rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Modificador "caballo": el caballito vive oculto fuera del borde
+   izquierdo (recortado por el overflow del inner) y entra galopando hacia
+   la izquierda del texto al hacer hover. El padding-left extra reserva su
+   sitio de antemano, para que el texto no se corra cuando el ícono entra.
+   Este modificador se usa en un solo lugar del sitio -el teaser de
+   "¿Quiénes somos?"-, a propósito: el caballo es la marca de esa sección,
+   no un adorno repetido en cada botón. */
+.btn-caballo .btn-pill-inner {
+  padding-left: 3.1rem;
+}
+
+.btn-caballo-icon {
+  position: absolute;
+  left: -2.75rem;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.btn-caballo-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-caballo-icon {
+    transition: left 0.53s cubic-bezier(0.3, 0.9, 0.4, 1);
+  }
+}
+
+.btn-caballo:hover .btn-caballo-icon,
+.btn-caballo:focus-visible .btn-caballo-icon {
+  left: 1rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -389,21 +499,27 @@ body.lang-fade {
   color: var(--azul-marino);
 }
 
-/* Solo ícono: el hero ya tiene el botón de WhatsApp con texto como
-   acción principal, así que repetir "WhatsApp" en el header es
-   redundante en la misma pantalla inicial. Este queda como acceso
-   rápido y discreto para cuando el hero ya salió de vista. */
+/* En mobile vive suelto dentro del panel de navegación a pantalla
+   completa, con aire de sobra, así que arranca siempre expandido con su
+   texto visible (no depende de hover, que no existe en touch). En
+   desktop (ver media query de 860px) arranca como solo-ícono y se
+   expande con la misma técnica de "cortina" que el resto del sitio, pero
+   en el eje horizontal (grid-template-columns 0fr → 1fr) en vez de
+   vertical: así el ancho del botón se anima limpio hasta su tamaño de
+   contenido real, sin importar cuánto más larga sea la traducción al
+   inglés. */
 .nav-cta {
+  position: relative;
   margin-top: 1rem;
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: 44px auto;
   align-items: center;
-  justify-content: center;
-  width: 44px;
   height: 44px;
   background: var(--verde-whatsapp);
   color: var(--azul-marino);
-  border-radius: 50%;
+  border-radius: 999px;
   flex-shrink: 0;
+  overflow: hidden;
   box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
   transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
@@ -414,9 +530,32 @@ body.lang-fade {
   box-shadow: 0 8px 16px -8px rgba(6, 38, 79, 0.35);
 }
 
-.nav-cta svg {
+.nav-cta-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.nav-cta-icon svg {
   width: 22px;
   height: 22px;
+}
+
+.nav-cta-label {
+  min-width: 0;
+  padding-right: 1.1rem;
+  font-family: var(--font-cuerpo);
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav-cta-label {
+    transition: padding-right 0.3s var(--ease);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -450,13 +589,6 @@ body.lang-fade {
   color: rgba(247, 245, 240, 0.78);
   margin-bottom: 1.6rem;
   max-width: 26rem;
-}
-
-.hero-byline-icon {
-  height: 19px;
-  width: auto;
-  flex-shrink: 0;
-  opacity: 0.85;
 }
 
 .hero-title {
@@ -831,6 +963,34 @@ body.lang-fade {
 
 .servicio-group-panel-inner {
   overflow: hidden;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .servicio-group-panel-inner {
+    transition: opacity 0.3s var(--ease);
+  }
+}
+
+.servicio-group.is-open .servicio-group-panel-inner {
+  opacity: 1;
+}
+
+/* Subtítulo de categoría dentro de un grupo (p.ej. "Seguros personales"
+   dentro de "Para ti"): marca visualmente los sub-bloques de servicios
+   sin introducir un tercer nivel de acordeón, solo un rótulo. */
+.servicio-subheading {
+  font-family: var(--font-cuerpo);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--texto-muted);
+  padding: 1.25rem 0.25rem 0.35rem 0.9rem;
+}
+
+.servicio-subheading:first-child {
+  padding-top: 0.5rem;
 }
 
 .servicio-item {
@@ -972,26 +1132,25 @@ body.lang-fade {
 }
 
 /* --------------------------------------------------------------------------
-   Alianzas institucionales — nota breve, no una sección mayor. Blanco
-   como servicios (se lee como cierre de esa misma idea) en vez de hueso
-   como testimonios (que necesita distinguirse como bloque aparte, ver
-   comentario más abajo). Una sola línea fina arriba basta para separarla
-   de la lista de servicios, sin caja ni sombra.
+   Alianzas institucionales — nota breve, no una sección mayor. Antes era
+   blanca, para leerse como cierre de la lista de servicios; ahora es hueso
+   porque la prioridad pasó a ser que cada sección se distinga claramente
+   de la siguiente (ver "Separación entre secciones" más arriba), y
+   servicios ya es blanco. La línea fina que la separaba de servicios
+   tampoco hace falta: ese corte ahora lo marcan el cambio de fondo y la
+   marca naranja de inicio de sección.
    -------------------------------------------------------------------------- */
 
 .alianzas {
-  background: var(--blanco);
+  background: var(--hueso);
 }
 
 .alianzas .section-inner {
-  padding-top: 0;
   padding-bottom: 4rem;
 }
 
 .alianzas-content {
   max-width: 42rem;
-  padding-top: 2.5rem;
-  border-top: 1px solid rgba(6, 38, 79, 0.16);
 }
 
 .alianzas-content h2 {
@@ -1011,6 +1170,49 @@ body.lang-fade {
 .alianzas-nombre {
   font-weight: 600;
   color: var(--azul-marca);
+}
+
+/* --------------------------------------------------------------------------
+   Teaser de "¿Quiénes somos?" — puente breve hacia sobre-nosotros.html.
+   Va en azul de marca, no en un tono claro más: es el único bloque oscuro
+   entre el hero y el footer, así que corta la página por la mitad y actúa
+   como el punto de respiro del recorrido. Eso además le da al caballito
+   -que solo aparece acá- un fondo propio donde destacar.
+   -------------------------------------------------------------------------- */
+
+.about-teaser {
+  background: var(--azul-marca);
+}
+
+/* El contenido de esta sección va centrado (a diferencia del resto, que
+   se alinea a la izquierda), así que su marca de inicio se centra también
+   en vez de quedar colgada al borde de la columna. */
+.about-teaser > .section-inner::before {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.about-teaser-inner {
+  max-width: 34rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  margin: 0 auto;
+}
+
+.about-teaser-inner h2 {
+  font-size: clamp(1.6rem, 2.8vw, 2.1rem);
+  color: var(--hueso);
+}
+
+.about-teaser-inner p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(247, 245, 240, 0.82);
 }
 
 /* --------------------------------------------------------------------------
@@ -1090,8 +1292,8 @@ body.lang-fade {
   font-size: 0.98rem;
 }
 
-.testimonios-footer .text-link {
-  margin-left: 0.3rem;
+.testimonios-footer p {
+  margin: 0 0 1.1rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -1355,6 +1557,13 @@ body.lang-fade {
 
 .footer-links a:hover {
   color: var(--hueso);
+}
+
+.footer-socials {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
 .footer-social {
@@ -1675,13 +1884,40 @@ body.lang-fade {
 
   .nav-cta {
     margin-top: 0;
+    grid-template-columns: 40px 0fr;
+    height: 40px;
+  }
+
+  .nav-cta-icon {
     width: 40px;
     height: 40px;
   }
 
-  .nav-cta svg {
+  .nav-cta-icon svg {
     width: 20px;
     height: 20px;
+  }
+
+  .nav-cta-label {
+    padding-right: 0;
+  }
+
+  @media (hover: hover) {
+    .nav-cta:hover,
+    .nav-cta:focus-visible {
+      grid-template-columns: 40px 1fr;
+    }
+
+    .nav-cta:hover .nav-cta-label,
+    .nav-cta:focus-visible .nav-cta-label {
+      padding-right: 1.1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-cta {
+      transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease), grid-template-columns 0.3s var(--ease);
+    }
   }
 
   .lang-toggle {

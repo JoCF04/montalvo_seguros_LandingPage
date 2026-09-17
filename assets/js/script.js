@@ -363,6 +363,41 @@
     window.addEventListener('resize', updateParallax);
   }
 
+  /* Botón de WhatsApp del hero: efecto "magnético", solo en desktop real
+     (hover: hover descarta touch e híbridos sin puntero fino). Mientras el
+     cursor está dentro del botón, este seduce hacia la posición del mouse
+     -desplazamiento acotado a ±9px, calculado desde el centro del botón y
+     amortiguado (factor 0.3) para que se sienta sutil, no que persiga el
+     cursor 1:1-. La transición se desactiva mientras se sigue al cursor
+     (si no, cada frame arrastraría detrás del mouse en vez de seguirlo al
+     instante) y se reactiva solo al salir, para el regreso suave a su
+     posición original. */
+  var magneticBtn = document.querySelector('.hero .btn-whatsapp');
+  var supportsHover = window.matchMedia('(hover: hover)').matches;
+
+  if (magneticBtn && supportsHover && !prefersReducedMotion) {
+    var MAGNETIC_STRENGTH = 0.3;
+    var MAGNETIC_MAX = 9;
+
+    magneticBtn.addEventListener('mouseenter', function () {
+      magneticBtn.style.transition = 'none';
+    });
+
+    magneticBtn.addEventListener('mousemove', function (event) {
+      var rect = magneticBtn.getBoundingClientRect();
+      var dx = event.clientX - (rect.left + rect.width / 2);
+      var dy = event.clientY - (rect.top + rect.height / 2);
+      dx = Math.max(-MAGNETIC_MAX, Math.min(MAGNETIC_MAX, dx * MAGNETIC_STRENGTH));
+      dy = Math.max(-MAGNETIC_MAX, Math.min(MAGNETIC_MAX, dy * MAGNETIC_STRENGTH));
+      magneticBtn.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+    });
+
+    magneticBtn.addEventListener('mouseleave', function () {
+      magneticBtn.style.transition = 'transform 150ms ease-out';
+      magneticBtn.style.transform = '';
+    });
+  }
+
   /* Servicios: índice + panel de lectura.
      - Desktop (>=860px): el nombre seleccionado cambia de color/peso en la
        lista de la izquierda; el panel de la derecha muestra su contenido
@@ -489,21 +524,44 @@
       window.requestAnimationFrame(updateAccentBar);
     });
 
-    /* Grupos plegables ("Para ti" / "Para tu empresa"): cada encabezado
-       controla su propio panel con la misma cortina (grid-template-rows)
-       que ya usa el acordeón móvil de cada servicio. Colapsar/expandir un
-       grupo puede mover al item activo (si vive debajo, o si el propio
-       grupo cambia de alto), así que la barra se reposiciona al iniciar
-       el toggle -así se anima en paralelo con la cortina, misma duración
-       y curva- y otra vez al terminar la transición, para corregir
-       cualquier desajuste (por ejemplo bajo prefers-reduced-motion, donde
-       la cortina no anima y salta directo al valor final).
+    /* Grupos plegables ("Para ti" / "Para tu empresa"): toggle estándar,
+       pero exclusivo entre sí. Abrir uno cierra el otro (la lista nunca
+       muestra ambos a la vez), y volver a hacer clic sobre el que ya está
+       abierto lo cierra, dejando la lista completamente colapsada — un
+       estado válido, no uno a evitar. Cada panel usa la misma cortina
+       (grid-template-rows + fundido de opacity) que ya usa el acordeón
+       móvil de cada servicio, y como el cierre de uno y la apertura del
+       otro corren en paralelo con la misma duración/curva, el grupo que se
+       abre "sube" de forma fluida hacia el espacio que deja el que se
+       cierra en vez de saltar de golpe.
+       Colapsar/expandir puede mover al item activo (si vive debajo, o si
+       el propio grupo cambia de alto), así que la barra se reposiciona al
+       iniciar el toggle -en paralelo con la cortina- y otra vez al
+       terminar la transición, para corregir cualquier desajuste (por
+       ejemplo bajo prefers-reduced-motion, donde la cortina no anima y
+       salta directo al valor final).
        inert oculta el contenido colapsado de teclado y lectores de
        pantalla: sin esto, los botones de servicio dentro de un grupo
        cerrado seguirían siendo alcanzables con Tab aunque estén ocultos
        visualmente (a diferencia del acordeón móvil, acá sí hay controles
-       interactivos -no solo texto- dentro del panel que se colapsa). */
+       interactivos -no solo texto- dentro del panel que se colapsa).
+       Al terminar de ABRIR un grupo, su encabezado se lleva a la vista si
+       hiciera falta (scrollIntoView con block:"nearest", que no mueve nada
+       si ya está visible): así, si "Para tu empresa" estaba más abajo de
+       lo que deja "Para ti" al cerrarse, el usuario no tiene que buscarlo.
+       Al cerrar no se hace ese ajuste: el encabezado sobre el que se acaba
+       de hacer clic ya está, por definición, bajo el cursor. */
     var servicioGroups = serviciosIndex.querySelectorAll('.servicio-group');
+    var GROUP_TRANSITION_MS = 300;
+
+    function setServicioGroupOpen(group, isOpen) {
+      var groupHeader = group.querySelector('.servicio-group-header');
+      var groupPanel = group.querySelector('.servicio-group-panel');
+
+      group.classList.toggle('is-open', isOpen);
+      groupHeader.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      groupPanel.toggleAttribute('inert', !isOpen);
+    }
 
     servicioGroups.forEach(function (group) {
       var groupHeader = group.querySelector('.servicio-group-header');
@@ -512,10 +570,11 @@
       groupPanel.toggleAttribute('inert', !group.classList.contains('is-open'));
 
       groupHeader.addEventListener('click', function () {
-        var isOpen = !group.classList.contains('is-open');
-        group.classList.toggle('is-open', isOpen);
-        groupHeader.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        groupPanel.toggleAttribute('inert', !isOpen);
+        var willOpen = !group.classList.contains('is-open');
+
+        servicioGroups.forEach(function (otherGroup) {
+          setServicioGroupOpen(otherGroup, otherGroup === group && willOpen);
+        });
 
         updateAccentBar();
 
@@ -526,6 +585,12 @@
               groupPanel.removeEventListener('transitionend', onEnd);
             }
           });
+        }
+
+        if (willOpen) {
+          window.setTimeout(function () {
+            groupHeader.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
+          }, prefersReducedMotion ? 0 : GROUP_TRANSITION_MS);
         }
       });
     });
