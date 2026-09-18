@@ -185,6 +185,7 @@ button {
 
 /* Sobre fondos oscuros, el foco en azul-marca no es legible: se cambia a
    hueso, que mantiene un contraste alto en ambas direcciones. */
+.site-header :focus-visible,
 .hero-copy :focus-visible,
 .site-footer :focus-visible,
 .about-masthead :focus-visible,
@@ -434,6 +435,13 @@ body.lang-fade {
    Header
    -------------------------------------------------------------------------- */
 
+/* La barra era hueso casi opaca sobre un hero azul: lo primero que se veía
+   era una franja pálida, un canto duro, y después el bloque azul. El header
+   no pertenecía al hero, se le montaba encima como una capa de interfaz
+   aparte. En azul-marino deja de ser "chrome" y pasa a ser una banda más
+   del sistema de bloques de color, un tono por debajo del azul de marca.
+   Funciona en las cuatro páginas porque todas abren con un bloque oscuro
+   (hero y masthead en azul-marca, el 404 en azul-marino). */
 .site-header {
   position: sticky;
   top: 0;
@@ -441,9 +449,23 @@ body.lang-fade {
   height: var(--header-height);
   display: flex;
   align-items: center;
-  background: rgba(247, 245, 240, 0.98);
-  border-bottom: 1px solid rgba(6, 38, 79, 0.12);
+  background: var(--azul-marino);
+  border-bottom: 1px solid rgba(247, 245, 240, 0.14);
   transition: transform 0.28s var(--ease);
+}
+
+/* Mismo grano que el resto de bloques sólidos de color, para que la banda
+   pertenezca a la misma superficie y no se lea como un plano plano pegado
+   encima. */
+.site-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .site-header.header-hidden {
@@ -458,15 +480,21 @@ body.lang-fade {
    posiciona de forma absoluta contra .site-header (que ya es la caja
    contenedora por ser position:sticky) en vez de vivir en el flujo del
    contenedor centrado. */
+/* El logo vive fuera de .header-inner a propósito (ver .header-inner), pero
+   antes iba pegado a x=0 mientras TODO el resto del contenido del sitio
+   arrancaba en el margen del contenedor. Era el único elemento que
+   ignoraba la retícula, y no se leía como un full-bleed deliberado sino
+   como un padding que no se aplicó. Ahora se alinea al mismo margen que el
+   contenido: el borde del contenedor centrado más su padding. */
 .brand {
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 1;
   height: 100%;
   display: flex;
   align-items: center;
-  padding-left: 0;
-  margin-left: 0;
+  padding-left: max(var(--container-pad), calc((100vw - var(--container-max)) / 2 + var(--container-pad)));
 }
 
 .brand-logo {
@@ -500,23 +528,20 @@ body.lang-fade {
   z-index: 110;
 }
 
+/* Hueso tanto cerrado como abierto: la barra del header y el panel a
+   pantalla completa son ahora los dos azul-marino. Aquí hubo un bug real:
+   cuando las barras eran azul-marino, la X de cerrar quedaba invisible
+   sobre el panel del mismo color -el botón funcionaba, pero nada indicaba
+   dónde estaba-. */
 .nav-toggle span {
   display: block;
   height: 2px;
   width: 26px;
   margin: 0 auto;
-  background: var(--azul-marino);
+  background: var(--hueso);
   transition: transform 0.25s var(--ease), opacity 0.2s var(--ease), background-color 0.2s var(--ease);
 }
 
-/* Con el menú abierto, el panel a pantalla completa es azul-marino y las
-   barras del botón también eran azul-marino: la X de cerrar quedaba
-   literalmente invisible sobre su propio fondo. El botón seguía siendo
-   clickeable, pero no había nada que indicara dónde. Abierto, las barras
-   pasan a hueso. */
-.nav-toggle[aria-expanded="true"] span {
-  background: var(--hueso);
-}
 
 .nav-toggle[aria-expanded="true"] span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
@@ -1978,8 +2003,12 @@ body.lang-fade {
    Footer
    -------------------------------------------------------------------------- */
 
+/* Header y pie comparten el azul-marino: son los dos extremos que cierran
+   la página. El azul de marca queda reservado para los bloques de
+   CONTENIDO (hero, masthead, teaser de "¿Quiénes somos?"), así que el tono
+   distingue estructura de contenido en vez de repetirse sin criterio. */
 .site-footer {
-  background: var(--azul-marca);
+  background: var(--azul-marino);
   color: var(--hueso);
   border-top: 1px solid rgba(247, 245, 240, 0.15);
 }
@@ -2286,12 +2315,11 @@ body.lang-fade {
    Página 404
    -------------------------------------------------------------------------- */
 
-/* azul-marino, no azul-marca: el footer ya es azul-marca, y con los dos
-   del mismo tono la página del 404 se leía como una sola losa azul
-   continua separada apenas por un filete al 15%. El tono más oscuro
-   devuelve la estructura de dos bloques. */
+/* Azul de marca, entre el header y el pie, que ahora son ambos
+   azul-marino: el cuerpo del 404 queda enmarcado por dos bandas más
+   oscuras en vez de fundirse con una de ellas. */
 .notfound {
-  background: var(--azul-marino);
+  background: var(--azul-marca);
   color: var(--hueso);
   min-height: 60vh;
   display: flex;
@@ -2401,11 +2429,24 @@ body.lang-fade {
     display: none;
   }
 
+  /* El nav se agrupa junto al logo y solo el CTA y el idioma quedan a la
+     derecha. Antes eran dos grupos contra las paredes opuestas con ~620px
+     de vacío en medio, que no leía como minimalismo sino como inacabado;
+     así baja a ~135px y el header se percibe como una unidad. */
+  .header-inner {
+    justify-content: space-between;
+    padding-left: calc(max(var(--container-pad), (100vw - var(--container-max)) / 2 + var(--container-pad)) + 200px);
+  }
+
+  .nav-menu {
+    margin-right: auto;
+  }
+
   .nav-link {
     font-size: var(--fs-md);
     font-family: var(--font-cuerpo);
     font-weight: 500;
-    color: var(--azul-marino);
+    color: rgba(247, 245, 240, 0.86);
   }
 
   .nav-link::after {
@@ -2428,17 +2469,17 @@ body.lang-fade {
   }
 
   .nav-link:hover {
-    color: var(--azul-marca);
+    color: var(--hueso);
   }
 
   .nav-link[aria-current="page"],
   .nav-link.is-active {
-    color: var(--azul-marca);
+    color: var(--hueso);
   }
 
   .nav-cta {
     margin-top: 0;
-    grid-template-columns: 40px 0fr;
+    grid-template-columns: 40px auto;
     height: 40px;
   }
 
@@ -2453,38 +2494,21 @@ body.lang-fade {
   }
 
   .nav-cta-label {
-    padding-right: 0;
-  }
-
-  @media (hover: hover) {
-    .nav-cta:hover,
-    .nav-cta:focus-visible {
-      grid-template-columns: 40px 1fr;
-    }
-
-    .nav-cta:hover .nav-cta-label,
-    .nav-cta:focus-visible .nav-cta-label {
-      padding-right: 1.1rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .nav-cta {
-      transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease), grid-template-columns 0.3s var(--ease);
-    }
+    padding-right: 1.1rem;
   }
 
   .lang-toggle {
     margin-top: 0;
-    border-color: var(--azul-marino);
-    color: var(--azul-marino);
+    border-color: rgba(247, 245, 240, 0.5);
+    color: var(--hueso);
     padding: 0.4rem 0.85rem;
     font-size: var(--fs-xs);
   }
 
   .lang-toggle:hover {
-    background: var(--azul-marino);
-    color: var(--hueso);
+    background: var(--hueso);
+    color: var(--azul-marino);
+    border-color: var(--hueso);
   }
 
   /* 42/58 en vez de 35/65. Con la columna de texto al 35% el titular caía
