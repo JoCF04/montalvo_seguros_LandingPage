@@ -973,8 +973,8 @@ body.lang-fade {
   border-top: 1px solid rgba(6, 38, 79, 0.16);
 }
 
-/* Los 12 servicios se agrupan en dos categorías plegables ("Para ti" /
-   "Para tu empresa") para que la lista no abrume de entrada: la mayoría
+/* Los 13 servicios se agrupan en dos categorías plegables ("Personales" /
+   "Patrimoniales") para que la lista no abrume de entrada: la mayoría
    de visitantes solo necesita la primera, así que arranca abierta,
    mientras la de empresa arranca cerrada. Reusa la misma técnica de
    "cortina" (grid-template-rows 0fr → 1fr) que ya usa el acordeón móvil
@@ -1051,9 +1051,11 @@ body.lang-fade {
   opacity: 1;
 }
 
-/* Subtítulo de categoría dentro de un grupo (p.ej. "Seguros personales"
-   dentro de "Para ti"): marca visualmente los sub-bloques de servicios
-   sin introducir un tercer nivel de acordeón, solo un rótulo. */
+/* Subtítulo de categoría dentro de un grupo (p.ej. "Seguro vehicular"
+   dentro de "Patrimoniales"): marca visualmente los sub-bloques de
+   servicios sin introducir un tercer nivel de acordeón, solo un rótulo.
+   Es lo que hace que SOAT y Contra Todo Riesgo se lean como las dos caras
+   de un mismo tema y no como dos categorías paralelas sin relación. */
 .servicio-subheading {
   font-family: var(--font-cuerpo);
   font-size: var(--fs-2xs);

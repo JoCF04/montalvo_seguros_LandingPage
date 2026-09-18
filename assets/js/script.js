@@ -222,7 +222,7 @@
         /* Espacio explícito ENTRE líneas. Visualmente no cambia nada (son
            bloques, el nodo colapsa), pero sin él todo lo que lee texto del
            DOM -un lector de pantalla, un buscador, copiar y pegar- recibía
-           las palabras del corte pegadas: "Más de 26 añosprotegiendo la". */
+           las palabras del corte pegadas: "Más de 34 añosprotegiendo la". */
         if (index < lines.length - 1) {
           heroTitle.appendChild(document.createTextNode(' '));
         }
@@ -528,6 +528,21 @@
       if (!accentBar || !listWrap || !isDesktopServicios()) return;
       var activeItem = servicioItems[activeServicioIndex];
       if (!activeItem) return;
+
+      /* Si el grupo que contiene al ítem activo está plegado, el ítem no se
+         ve y la barra no tiene nada que señalar. Antes seguía dibujándose
+         igual: conservaba su altura y quedaba flotando fuera de la lista
+         -.servicios-list-wrap no recorta el desbordamiento-, colándose en
+         la sección de abajo. Como vive en x=0 del contenedor, aterrizaba
+         justo sobre el margen izquierdo del rótulo "CONVENIO VIGENTE" de
+         Alianzas y parecía un adorno de esa sección. Se reproducía así:
+         elegir un servicio y después plegar su grupo. */
+      var group = activeItem.closest('.servicio-group');
+      if (!group || !group.classList.contains('is-open')) {
+        accentBar.style.height = '0px';
+        return;
+      }
+
       var itemRect = activeItem.getBoundingClientRect();
       var wrapRect = listWrap.getBoundingClientRect();
       accentBar.style.transform = 'translateY(' + (itemRect.top - wrapRect.top) + 'px)';
@@ -622,7 +637,7 @@
       });
     });
 
-    /* Grupos plegables ("Para ti" / "Para tu empresa"): toggle estándar,
+    /* Grupos plegables ("Personales" / "Patrimoniales"): toggle estándar,
        pero exclusivo entre sí. Abrir uno cierra el otro (la lista nunca
        muestra ambos a la vez), y volver a hacer clic sobre el que ya está
        abierto lo cierra, dejando la lista completamente colapsada — un
@@ -645,8 +660,8 @@
        interactivos -no solo texto- dentro del panel que se colapsa).
        Al terminar de ABRIR un grupo, su encabezado se lleva a la vista si
        hiciera falta (scrollIntoView con block:"nearest", que no mueve nada
-       si ya está visible): así, si "Para tu empresa" estaba más abajo de
-       lo que deja "Para ti" al cerrarse, el usuario no tiene que buscarlo.
+       si ya está visible): así, si "Patrimoniales" estaba más abajo de
+       lo que deja "Personales" al cerrarse, el usuario no tiene que buscarlo.
        Al cerrar no se hace ese ajuste: el encabezado sobre el que se acaba
        de hacer clic ya está, por definición, bajo el cursor. */
     var servicioGroups = serviciosIndex.querySelectorAll('.servicio-group');
@@ -992,7 +1007,7 @@
     });
   }
 
-  /* Contador animado para "26 años" en sobre-nosotros.html: se dispara una
+  /* Contador animado para "34 años" en sobre-nosotros.html: se dispara una
      sola vez, la primera vez que el texto entra en pantalla. */
   var counters = document.querySelectorAll('.counter');
 
