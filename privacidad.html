@@ -50,10 +50,21 @@
     </button>
 
     <nav class="nav-menu" id="nav-menu">
-      <a href="index.html#inicio" class="nav-link" data-es="Inicio" data-en="Home">Inicio</a>
-      <a href="index.html#servicios" class="nav-link" data-es="Servicios" data-en="Services">Servicios</a>
-      <a href="sobre-nosotros.html" class="nav-link" data-es="Nosotros" data-en="About">Nosotros</a>
-      <a href="index.html#contacto" class="nav-link" data-es="Contacto" data-en="Contact">Contacto</a>
+      <button type="button" class="nav-close" id="nav-close" data-aria-es="Cerrar menú" data-aria-en="Close menu" aria-label="Cerrar menú">
+        <span class="nav-close-mark" aria-hidden="true"></span>
+      </button>
+
+      <div class="nav-panel-head" aria-hidden="true">
+        <img src="assets/img/logo-blanco.png" alt="" class="nav-panel-logo">
+      </div>
+
+      <div class="nav-links">
+        <a href="index.html#inicio" class="nav-link"><span class="nav-link-num" aria-hidden="true">01</span><span class="nav-link-text" data-es="Inicio" data-en="Home">Inicio</span></a>
+      <a href="index.html#servicios" class="nav-link"><span class="nav-link-num" aria-hidden="true">02</span><span class="nav-link-text" data-es="Servicios" data-en="Services">Servicios</span></a>
+      <a href="sobre-nosotros.html" class="nav-link"><span class="nav-link-num" aria-hidden="true">03</span><span class="nav-link-text" data-es="Nosotros" data-en="About">Nosotros</span></a>
+      <a href="index.html#contacto" class="nav-link"><span class="nav-link-num" aria-hidden="true">04</span><span class="nav-link-text" data-es="Contacto" data-en="Contact">Contacto</span></a>
+      </div>
+
       <a href="https://wa.me/51991472352" target="_blank" rel="noopener noreferrer" class="nav-cta" data-aria-es="Escríbeme por WhatsApp" data-aria-en="Message me on WhatsApp" aria-label="Escríbeme por WhatsApp">
         <span class="nav-cta-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.29-.15-1.71-.84-1.97-.94-.27-.1-.46-.15-.66.15-.19.29-.75.94-.92 1.13-.17.19-.34.22-.63.07-.29-.15-1.22-.45-2.32-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.66-1.59-.9-2.18-.24-.57-.48-.49-.66-.5h-.56c-.19 0-.51.07-.78.36-.27.29-1.02 1-1.02 2.43 0 1.43 1.04 2.82 1.19 3.01.15.19 2.05 3.13 4.97 4.39.69.3 1.23.48 1.65.61.69.22 1.32.19 1.82.11.55-.08 1.71-.7 1.95-1.37.24-.68.24-1.26.17-1.38-.07-.12-.26-.19-.55-.34z"/><path fill="currentColor" d="M12.02 2C6.5 2 2.02 6.48 2.02 12c0 1.87.5 3.62 1.44 5.13L2 22l4.98-1.4A9.96 9.96 0 0 0 12.02 22C17.53 22 22 17.52 22 12S17.53 2 12.02 2zm0 18.11c-1.68 0-3.29-.46-4.69-1.32l-.34-.2-3 .84.8-2.94-.22-.35A8.1 8.1 0 0 1 3.9 12c0-4.48 3.65-8.12 8.12-8.12S20.14 7.52 20.14 12s-3.65 8.11-8.12 8.11z"/></svg></span>
         <span class="nav-cta-label" data-es="¡Hablemos!" data-en="Let's talk!">¡Hablemos!</span>

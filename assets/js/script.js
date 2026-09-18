@@ -314,11 +314,14 @@
     );
   }
 
+  var navClose = document.getElementById('nav-close');
+
   function closeMenu() {
     if (!navMenu.classList.contains('is-open')) return;
     navMenu.classList.remove('is-open');
     navToggle.setAttribute('aria-expanded', 'false');
     navToggle.setAttribute('aria-label', t('menuOpen'));
+    document.body.classList.remove('menu-open');
     if (navIsOverlay()) unlockBodyScroll();
     if (mainEl) mainEl.removeAttribute('inert');
     if (footerEl) footerEl.removeAttribute('inert');
@@ -329,11 +332,22 @@
     navToggle.setAttribute('aria-expanded', 'true');
     navToggle.setAttribute('aria-label', t('menuClose'));
     if (siteHeader) siteHeader.classList.remove('header-hidden');
+    /* menu-open anula el transform del header mientras el panel está
+       abierto. Sin eso, un header a medio animar convierte al panel fixed
+       en hijo posicionado suyo y le arranca la X de la pantalla. */
+    document.body.classList.add('menu-open');
     if (navIsOverlay()) lockBodyScroll();
     /* inert saca del foco y de los lectores de pantalla todo lo que quedó
        detrás del panel, que es exactamente lo que se ve. */
     if (mainEl) mainEl.setAttribute('inert', '');
     if (footerEl) footerEl.setAttribute('inert', '');
+
+    /* El foco entra al panel por el botón de cerrar: es el primer control
+       del ciclo y garantiza que quien navega con teclado o lector de
+       pantalla sepa de inmediato cómo salir. */
+    if (navClose && navIsOverlay()) {
+      window.requestAnimationFrame(function () { navClose.focus(); });
+    }
   }
 
   var mainEl = document.getElementById('contenido');
@@ -353,6 +367,13 @@
       link.addEventListener('click', closeMenu);
     });
 
+    if (navClose) {
+      navClose.addEventListener('click', function () {
+        closeMenu();
+        navToggle.focus();
+      });
+    }
+
     document.addEventListener('keydown', function (event) {
       if (!navMenu.classList.contains('is-open')) return;
 
@@ -368,7 +389,7 @@
          último control del panel. */
       if (event.key !== 'Tab') return;
 
-      var focusables = [navToggle].concat(menuFocusables());
+      var focusables = menuFocusables();
       if (!focusables.length) return;
 
       var first = focusables[0];

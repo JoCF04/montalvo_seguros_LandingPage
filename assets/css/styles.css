@@ -54,6 +54,11 @@
      justamente no es). */
   --radio: 2px;
 
+  /* Área segura de iOS (notch y barra de gestos). Van como variables y no
+     inline para poder simularlas en pruebas: basta redefinirlas. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
   /* Layout */
   --container-max: 1220px;
   --container-pad: 1.75rem;
@@ -472,6 +477,26 @@ body.lang-fade {
   transform: translateY(-100%);
 }
 
+/* El panel de navegación es position:fixed y vive DENTRO del header. Un
+   ancestro con transform crea bloque contenedor para sus descendientes
+   fixed, así que mientras el header lleva su translateY de ocultarse, el
+   panel deja de anclarse al viewport y pasa a anclarse al header: colapsa
+   de la altura de pantalla a los 84px del header y su contenido -la X de
+   cerrar incluida- se va por encima del borde superior.
+   Medido: con el transform activo el panel pasaba de 844px de alto a 83px,
+   y la X de y=20 a y=-24. En iOS Safari la ventana en que eso ocurre es
+   mucho más ancha que en Chrome, porque la barra de direcciones entra y
+   sale al hacer scroll y el header se oculta y reaparece constantemente;
+   de ahí el síntoma que reportó el cliente (la X no aparecía hasta
+   deslizar un poco hacia arriba, que es justo lo que limpia el transform).
+   Anular transform y transition mientras el menú está abierto elimina el
+   bloque contenedor de raíz, en vez de depender de que el header no esté
+   animándose en ese instante. */
+body.menu-open .site-header {
+  transform: none;
+  transition: none;
+}
+
 /* El logo vive fuera de .header-inner a propósito: .header-inner está
    centrado con max-width y padding a ambos lados (igual que el resto de
    secciones), así que cualquier elemento dentro de él hereda ese espacio
@@ -555,36 +580,191 @@ body.lang-fade {
   transform: translateY(-7px) rotate(-45deg);
 }
 
+/* Panel de navegación móvil.
+   Antes era un bloque azul liso con cuatro links centrados: correcto pero
+   anónimo, el mismo menú que trae cualquier plantilla. Ahora reusa el
+   vocabulario que ya existe en el sitio -numeración como el índice de
+   sobre-nosotros, filetes finos como servicios y testimonios, Fraunces a
+   tamaño de display, naranja como acento- para que se lea como una página
+   más del mismo diseño y no como un componente de interfaz aparte.
+   100dvh, no 100vh: en iOS la barra de direcciones cambia de alto al
+   hacer scroll y vh se queda con la altura grande, dejando el pie del
+   panel por debajo del borde visible. */
 .nav-menu {
   position: fixed;
   inset: 0;
+  height: 100dvh;
   background: var(--azul-marino);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 1.75rem;
-  padding: 2rem 2rem;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: calc(var(--safe-top) + 1.5rem) 1.75rem calc(var(--safe-bottom) + 1.75rem);
   transform: translateX(100%);
   transition: transform 0.35s var(--ease);
   z-index: 105;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .nav-menu.is-open {
   transform: translateX(0);
 }
 
+/* Cabecera propia del panel: el logo vuelve a estar visible mientras el
+   menú está abierto (antes el panel lo tapaba y no quedaba ninguna marca
+   de dónde estabas). */
+.nav-panel-head {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.nav-panel-logo {
+  height: 38px;
+  width: auto;
+}
+
+/* La X vive DENTRO del panel, no en el header. Además de ser lo correcto
+   semánticamente -cierra este panel-, la hace inmune a cualquier
+   posicionamiento raro del header: el panel siempre está anclado al
+   viewport. */
+.nav-close {
+  position: absolute;
+  top: calc(var(--safe-top) + 1.5rem);
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 2;
+}
+
+/* La X se construye con los dos pseudo-elementos del mismo contenedor,
+   cada uno rotado sobre su propio centro. Antes el trazo era el propio
+   contenedor y el segundo su ::before, así que la rotación del segundo se
+   componía sobre la del primero y los brazos no cerraban. */
+.nav-close-mark {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.nav-close-mark::before,
+.nav-close-mark::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: var(--hueso);
+}
+
+.nav-close-mark::before { transform: rotate(45deg); }
+.nav-close-mark::after { transform: rotate(-45deg); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav-close-mark::before,
+  .nav-close-mark::after { transition: background-color 0.2s var(--ease); }
+}
+
+.nav-close:hover .nav-close-mark::before,
+.nav-close:hover .nav-close-mark::after { background: var(--naranja-marca); }
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2.5rem;
+  border-top: 1px solid rgba(247, 245, 240, 0.16);
+}
+
 .nav-link {
   position: relative;
   display: flex;
-  align-items: center;
-  /* 44px de área de toque en el panel móvil: el texto solo daba 38px. */
+  align-items: baseline;
+  gap: 1rem;
   min-height: 44px;
-  font-size: 1.5rem;
+  padding: 1.05rem 0;
+  border-bottom: 1px solid rgba(247, 245, 240, 0.16);
+  font-size: clamp(1.75rem, 8vw, 2.4rem);
   font-family: var(--font-titulares);
   font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
   color: var(--hueso);
-  letter-spacing: -0.005em;
+}
+
+/* Numeración: el mismo recurso del índice de sobre-nosotros y del panel
+   de lectura de servicios. Es lo que ata el menú al resto del sitio. */
+.nav-link-num {
+  flex-shrink: 0;
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  /* 0.45 daba 3.88:1 sobre el azul-marino, por debajo del 4.5:1 de AA.
+     A 0.55 llega a 5.10:1 y el número sigue leyéndose como dato
+     secundario: lo que lo subordina es el tamaño y la versalita, no que
+     esté desteñido. */
+  color: rgba(247, 245, 240, 0.55);
+  transition: color 0.2s var(--ease);
+}
+
+.nav-link[aria-current="page"] .nav-link-num,
+.nav-link.is-active .nav-link-num {
+  color: var(--naranja-marca);
+}
+
+/* Entrada escalonada: los links no aparecen de golpe con el panel, entran
+   uno detrás de otro una vez que la cortina ya se abrió. El desfase es
+   corto (55ms) para que se lea como un gesto y no como una espera. */
+@media (prefers-reduced-motion: no-preference) {
+  .nav-link,
+  .nav-menu .nav-cta,
+  .nav-menu .lang-toggle {
+    opacity: 0;
+  }
+
+  .nav-menu.is-open .nav-link,
+  .nav-menu.is-open .nav-cta,
+  .nav-menu.is-open .lang-toggle {
+    animation: navEntrar 0.42s var(--ease) forwards;
+  }
+
+  .nav-menu.is-open .nav-link:nth-child(1) { animation-delay: 0.16s; }
+  .nav-menu.is-open .nav-link:nth-child(2) { animation-delay: 0.215s; }
+  .nav-menu.is-open .nav-link:nth-child(3) { animation-delay: 0.27s; }
+  .nav-menu.is-open .nav-link:nth-child(4) { animation-delay: 0.325s; }
+  .nav-menu.is-open .nav-cta { animation-delay: 0.4s; }
+  .nav-menu.is-open .lang-toggle { animation-delay: 0.45s; }
+}
+
+@keyframes navEntrar {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* El pie del panel empuja hacia abajo para que el CTA y el idioma queden
+   al alcance del pulgar, no flotando a media pantalla. */
+.nav-menu .nav-cta {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.nav-menu .lang-toggle {
+  position: relative;
+  z-index: 1;
+  margin-top: 1.1rem;
 }
 
 .nav-link[aria-current="page"],
@@ -2420,9 +2600,26 @@ body.lang-fade {
     background: none;
     flex-direction: row;
     align-items: center;
+    height: auto;
     padding: 0;
     transform: none;
     gap: 2rem;
+    overflow: visible;
+  }
+
+  /* La cabecera del panel y la X solo existen como pantalla completa en
+     mobile; en desktop el nav es una fila más del header. */
+  .nav-panel-head,
+  .nav-close,
+  .nav-link-num {
+    display: none;
+  }
+
+  /* display: contents deja que los cuatro links vuelvan a ser hijos
+     directos del flex del nav, sin que el contenedor que necesitan en
+     mobile introduzca un nivel extra en la fila de desktop. */
+  .nav-links {
+    display: contents;
   }
 
   /* El grano solo tiene sentido sobre el panel azul-marino a pantalla
@@ -2445,10 +2642,26 @@ body.lang-fade {
   }
 
   .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 0;
+    padding: 0;
+    border-bottom: none;
     font-size: var(--fs-md);
     font-family: var(--font-cuerpo);
     font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.6;
     color: rgba(247, 245, 240, 0.86);
+    opacity: 1;
+    animation: none;
+  }
+
+  .nav-menu .nav-cta,
+  .nav-menu .lang-toggle {
+    opacity: 1;
+    animation: none;
+    margin-top: 0;
   }
 
   .nav-link::after {
