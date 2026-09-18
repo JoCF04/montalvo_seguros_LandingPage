@@ -137,6 +137,21 @@
     var TITLE_LINE_STAGGER = 0.09;
     var POST_TITLE_GAP = 0.11;
 
+    /* La entrada del titular es un momento único, al cargar la página.
+       Cada vez que se re-divide el h1 se crean spans nuevos, y un span
+       nuevo con la animación puesta arranca otra vez desde opacity:0: sin
+       esta bandera, cualquier resize hacía DESAPARECER el titular y lo
+       volvía a animar. En un teléfono eso pasa cada vez que la barra de
+       URL se colapsa al hacer scroll. Una vez que la entrada terminó, las
+       divisiones siguientes se pintan ya visibles. */
+    var heroIntroDone = false;
+
+    /* Solo el ANCHO cambia dónde corta cada línea. Guardar el último ancho
+       y salir temprano si no cambió evita todo el trabajo (y todo riesgo
+       de parpadeo) en el caso más frecuente en mobile: el resize de solo
+       altura que dispara la barra de URL al aparecer y desaparecer. */
+    var lastHeroWidth = window.innerWidth;
+
     heroTitle.style.opacity = '0';
 
     var splitHeroTitleLines = function () {
@@ -179,7 +194,17 @@
       lines.forEach(function (lineWords, index) {
         var lineEl = document.createElement('span');
         lineEl.className = 'hero-title-line';
-        lineEl.style.animationDelay = (TITLE_LINE_BASE_DELAY + index * TITLE_LINE_STAGGER) + 's';
+
+        if (heroIntroDone) {
+          /* Re-división posterior a la entrada (resize, fuentes, cambio de
+             idioma): el titular ya se mostró, así que estas líneas nacen
+             visibles y sin animación. */
+          lineEl.style.animation = 'none';
+          lineEl.style.opacity = '1';
+        } else {
+          lineEl.style.animationDelay = (TITLE_LINE_BASE_DELAY + index * TITLE_LINE_STAGGER) + 's';
+        }
+
         lineWords.forEach(function (word, wi) {
           lineEl.appendChild(word);
           if (wi < lineWords.length - 1) {
@@ -187,6 +212,14 @@
           }
         });
         heroTitle.appendChild(lineEl);
+
+        /* Espacio explícito ENTRE líneas. Visualmente no cambia nada (son
+           bloques, el nodo colapsa), pero sin él todo lo que lee texto del
+           DOM -un lector de pantalla, un buscador, copiar y pegar- recibía
+           las palabras del corte pegadas: "Más de 26 añosprotegiendo la". */
+        if (index < lines.length - 1) {
+          heroTitle.appendChild(document.createTextNode(' '));
+        }
       });
 
       heroTitle.style.opacity = '';
@@ -194,6 +227,15 @@
       var lastLineDelay = TITLE_LINE_BASE_DELAY + (lines.length - 1) * TITLE_LINE_STAGGER;
       if (heroSubtitleEl) heroSubtitleEl.style.animationDelay = (lastLineDelay + POST_TITLE_GAP) + 's';
       if (heroActionsEl) heroActionsEl.style.animationDelay = (lastLineDelay + POST_TITLE_GAP + 0.12) + 's';
+
+      if (!heroIntroDone) {
+        /* Se marca como terminada cuando la última línea acabó de entrar,
+           más un margen. A partir de ahí ninguna re-división vuelve a
+           ocultar el titular. */
+        window.setTimeout(function () {
+          heroIntroDone = true;
+        }, (lastLineDelay + 0.7 + 0.2) * 1000);
+      }
     };
 
     updateHeroTitleLines = splitHeroTitleLines;
@@ -206,6 +248,8 @@
     }
 
     window.addEventListener('resize', function () {
+      if (window.innerWidth === lastHeroWidth) return;
+      lastHeroWidth = window.innerWidth;
       window.requestAnimationFrame(splitHeroTitleLines);
     });
   }
@@ -224,10 +268,54 @@
   var navMenu = document.getElementById('nav-menu');
   var siteHeader = document.querySelector('.site-header');
 
+  /* El panel de navegación es un position:fixed a pantalla completa, así
+     que mientras está abierto el resto de la página tiene que quedar
+     inmóvil e inalcanzable. Sin esto pasaban dos cosas: el contenido de
+     atrás seguía haciendo scroll bajo el panel (muy notorio en iOS), y
+     con Tab se salía del menú hacia links que están tapados y no se ven.
+     Se guarda la posición de scroll antes de bloquear y se restaura al
+     cerrar, porque position:fixed sobre el body la pierde. */
+  var scrollLockY = 0;
+
+  function lockBodyScroll() {
+    scrollLockY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollLockY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  }
+
+  function unlockBodyScroll() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollLockY);
+  }
+
+  /* El menú a pantalla completa solo existe bajo 860px; en desktop el nav
+     es una fila más del header y no debe bloquear nada. */
+  function navIsOverlay() {
+    return window.matchMedia('(max-width: 859.98px)').matches;
+  }
+
+  function menuFocusables() {
+    return Array.prototype.filter.call(
+      navMenu.querySelectorAll('a[href], button'),
+      function (el) { return el.offsetWidth > 0 || el.offsetHeight > 0; }
+    );
+  }
+
   function closeMenu() {
+    if (!navMenu.classList.contains('is-open')) return;
     navMenu.classList.remove('is-open');
     navToggle.setAttribute('aria-expanded', 'false');
     navToggle.setAttribute('aria-label', t('menuOpen'));
+    if (navIsOverlay()) unlockBodyScroll();
+    if (mainEl) mainEl.removeAttribute('inert');
+    if (footerEl) footerEl.removeAttribute('inert');
   }
 
   function openMenu() {
@@ -235,7 +323,15 @@
     navToggle.setAttribute('aria-expanded', 'true');
     navToggle.setAttribute('aria-label', t('menuClose'));
     if (siteHeader) siteHeader.classList.remove('header-hidden');
+    if (navIsOverlay()) lockBodyScroll();
+    /* inert saca del foco y de los lectores de pantalla todo lo que quedó
+       detrás del panel, que es exactamente lo que se ve. */
+    if (mainEl) mainEl.setAttribute('inert', '');
+    if (footerEl) footerEl.setAttribute('inert', '');
   }
+
+  var mainEl = document.getElementById('contenido');
+  var footerEl = document.querySelector('.site-footer');
 
   if (navToggle && navMenu) {
     navToggle.addEventListener('click', function () {
@@ -252,9 +348,41 @@
     });
 
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && navMenu.classList.contains('is-open')) {
+      if (!navMenu.classList.contains('is-open')) return;
+
+      if (event.key === 'Escape') {
         closeMenu();
         navToggle.focus();
+        return;
+      }
+
+      /* Trampa de foco: con el resto de la página en inert, Tab podría
+         escaparse a la barra del navegador y dejar el panel abierto sin
+         foco dentro. El ciclo se cierra entre el botón de cerrar y el
+         último control del panel. */
+      if (event.key !== 'Tab') return;
+
+      var focusables = [navToggle].concat(menuFocusables());
+      if (!focusables.length) return;
+
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    /* Si se cruza a desktop con el menú abierto, el panel deja de ser un
+       overlay: hay que soltar el bloqueo y el inert o la página queda
+       congelada sin nada que lo explique. */
+    window.addEventListener('resize', function () {
+      if (!navIsOverlay() && navMenu.classList.contains('is-open')) {
+        closeMenu();
       }
     });
   }
@@ -265,7 +393,6 @@
   if (siteHeader && !prefersReducedMotion) {
     var lastScrollY = window.scrollY;
     var tickingHeader = false;
-    var nearTopThreshold = 60;
 
     var updateHeader = function () {
       var currentScrollY = window.scrollY;
@@ -289,43 +416,7 @@
         tickingHeader = true;
       }
     }, { passive: true });
-
-    document.addEventListener('mousemove', function (event) {
-      if (event.clientY <= nearTopThreshold) {
-        siteHeader.classList.remove('header-hidden');
-      }
-    });
   }
-
-  /* Barra de progreso de scroll: se inyecta directamente en el DOM (no
-     hace falta marcarla en cada página) y se actualiza con el mismo
-     patrón de throttling por rAF que el header. */
-  var scrollProgress = document.createElement('div');
-  scrollProgress.className = 'scroll-progress';
-  scrollProgress.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(scrollProgress);
-
-  (function () {
-    var tickingProgress = false;
-
-    var updateProgress = function () {
-      var scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      var ratio = scrollable > 0 ? window.scrollY / scrollable : 0;
-      scrollProgress.style.transform = 'scaleX(' + Math.min(Math.max(ratio, 0), 1) + ')';
-      tickingProgress = false;
-    };
-
-    updateProgress();
-
-    window.addEventListener('scroll', function () {
-      if (!tickingProgress) {
-        window.requestAnimationFrame(updateProgress);
-        tickingProgress = true;
-      }
-    }, { passive: true });
-
-    window.addEventListener('resize', updateProgress);
-  })();
 
   /* Parallax sutil de la foto del hero: al bajar, la foto se desplaza a
      una fracción de la velocidad del resto de la página (efecto de
@@ -361,41 +452,6 @@
     }, { passive: true });
 
     window.addEventListener('resize', updateParallax);
-  }
-
-  /* Botón de WhatsApp del hero: efecto "magnético", solo en desktop real
-     (hover: hover descarta touch e híbridos sin puntero fino). Mientras el
-     cursor está dentro del botón, este seduce hacia la posición del mouse
-     -desplazamiento acotado a ±9px, calculado desde el centro del botón y
-     amortiguado (factor 0.3) para que se sienta sutil, no que persiga el
-     cursor 1:1-. La transición se desactiva mientras se sigue al cursor
-     (si no, cada frame arrastraría detrás del mouse en vez de seguirlo al
-     instante) y se reactiva solo al salir, para el regreso suave a su
-     posición original. */
-  var magneticBtn = document.querySelector('.hero .btn-whatsapp');
-  var supportsHover = window.matchMedia('(hover: hover)').matches;
-
-  if (magneticBtn && supportsHover && !prefersReducedMotion) {
-    var MAGNETIC_STRENGTH = 0.3;
-    var MAGNETIC_MAX = 9;
-
-    magneticBtn.addEventListener('mouseenter', function () {
-      magneticBtn.style.transition = 'none';
-    });
-
-    magneticBtn.addEventListener('mousemove', function (event) {
-      var rect = magneticBtn.getBoundingClientRect();
-      var dx = event.clientX - (rect.left + rect.width / 2);
-      var dy = event.clientY - (rect.top + rect.height / 2);
-      dx = Math.max(-MAGNETIC_MAX, Math.min(MAGNETIC_MAX, dx * MAGNETIC_STRENGTH));
-      dy = Math.max(-MAGNETIC_MAX, Math.min(MAGNETIC_MAX, dy * MAGNETIC_STRENGTH));
-      magneticBtn.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
-    });
-
-    magneticBtn.addEventListener('mouseleave', function () {
-      magneticBtn.style.transition = 'transform 150ms ease-out';
-      magneticBtn.style.transform = '';
-    });
   }
 
   /* Servicios: índice + panel de lectura.
@@ -472,6 +528,36 @@
       accentBar.style.height = itemRect.height + 'px';
     }
 
+    /* El mismo botón cumple dos papeles según el ancho, y el ARIA tiene
+       que decir cuál está cumpliendo:
+       - En mobile abre y cierra el panel que tiene justo debajo, así que
+         aria-expanded/aria-controls apuntan a ese panel: es un acordeón.
+       - En desktop ese panel está en display:none y el texto sale en el
+         panel de lectura compartido de la derecha. El botón deja de
+         expandir nada propio y pasa a comportarse como una pestaña, así
+         que se anuncia con aria-controls hacia el panel compartido y
+         aria-expanded solo en el activo.
+       Antes aria-expanded se quedaba en "false" para siempre en desktop
+       -incluso en el servicio activo, con su texto visible al lado- y
+       aria-controls señalaba un elemento oculto. */
+    function syncServicioAria() {
+      var desktop = isDesktopServicios();
+      servicioItems.forEach(function (it, i) {
+        var trigger = it.querySelector('.servicio-trigger');
+        var panel = it.querySelector('.servicio-panel-mobile');
+        if (desktop) {
+          trigger.setAttribute('aria-controls', 'servicios-reading-content');
+          trigger.setAttribute('aria-expanded', i === activeServicioIndex ? 'true' : 'false');
+          panel.setAttribute('aria-hidden', 'true');
+        } else {
+          trigger.setAttribute('aria-controls', panel.id);
+          var open = it.classList.contains('is-open');
+          trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+          panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+      });
+    }
+
     function setActiveServicio(index, animate) {
       activeServicioIndex = index;
       servicioItems.forEach(function (it, i) {
@@ -479,6 +565,7 @@
       });
       renderReadingPanel(servicioItems[index], index, animate);
       updateAccentBar();
+      syncServicioAria();
     }
 
     updateServiciosAccentBar = updateAccentBar;
@@ -508,6 +595,8 @@
 
         if (index !== activeServicioIndex) {
           setActiveServicio(index, !mobileMode);
+        } else {
+          syncServicioAria();
         }
       });
     });
@@ -521,7 +610,10 @@
        de un item cambia de alto por el idioma activo). No dispara el
        fundido del panel, solo reposiciona. */
     window.addEventListener('resize', function () {
-      window.requestAnimationFrame(updateAccentBar);
+      window.requestAnimationFrame(function () {
+        updateAccentBar();
+        syncServicioAria();
+      });
     });
 
     /* Grupos plegables ("Para ti" / "Para tu empresa"): toggle estándar,
@@ -591,6 +683,34 @@
           window.setTimeout(function () {
             groupHeader.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
           }, prefersReducedMotion ? 0 : GROUP_TRANSITION_MS);
+        }
+      });
+    });
+  }
+
+  /* Preguntas frecuentes: acordeón simple, uno abierto a la vez. Reusa la
+     misma cortina (grid-template-rows) que el índice de servicios, así que
+     no necesita medir alturas ni escribir estilos en línea. A diferencia
+     del acordeón de servicios, acá no hace falta inert: lo que se colapsa
+     es solo texto, sin controles enfocables dentro. */
+  var faqItems = document.querySelectorAll('.faq-item');
+
+  if (faqItems.length) {
+    faqItems.forEach(function (item) {
+      var trigger = item.querySelector('.faq-trigger');
+      var panel = item.querySelector('.faq-panel');
+
+      trigger.addEventListener('click', function () {
+        var wasOpen = item.classList.contains('is-open');
+
+        faqItems.forEach(function (other) {
+          other.classList.remove('is-open');
+          other.querySelector('.faq-trigger').setAttribute('aria-expanded', 'false');
+        });
+
+        if (!wasOpen) {
+          item.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
         }
       });
     });

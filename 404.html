@@ -5,15 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Página no encontrada | Andrés Montalvo Chero</title>
 <meta name="description" content="La página que buscas no existe o se ha movido. Vuelve al inicio de montalvoseguros.com.pe.">
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#0A3E84">
+
+<!-- Sin canonical a propósito: esta página se sirve bajo cualquier URL
+     inexistente, así que no tiene una dirección propia que declarar.
+     noindex la mantiene fuera del índice y follow deja que el rastreador
+     siga los enlaces de vuelta al sitio. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Andrés Montalvo Chero — Corredor de Seguros">
+<meta property="og:title" content="Página no encontrada | Andrés Montalvo Chero">
+<meta property="og:description" content="La página que buscas no existe o se ha movido. Vuelve al inicio de montalvoseguros.com.pe.">
+<meta property="og:image" content="https://montalvoseguros.com.pe/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Andrés Montalvo Chero, corredor de seguros en Andahuaylas y Lima">
+<meta property="og:locale" content="es_PE">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Página no encontrada | Andrés Montalvo Chero">
+<meta name="twitter:description" content="La página que buscas no existe o se ha movido. Vuelve al inicio de montalvoseguros.com.pe.">
+<meta name="twitter:image" content="https://montalvoseguros.com.pe/assets/img/og-image.jpg">
+<meta name="twitter:image:alt" content="Andrés Montalvo Chero, corredor de seguros en Andahuaylas y Lima">
 
 <link rel="icon" type="image/png" href="assets/img/icono-caballo-azul.png">
 <link rel="apple-touch-icon" href="assets/img/icono-caballo-azul.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:SOFT,WONK,opsz,wght@0..100,0..1,9..144,300..700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
@@ -68,6 +88,7 @@
       <div class="footer-links">
         <a href="index.html#inicio" data-es="Inicio" data-en="Home">Inicio</a>
         <a href="index.html#servicios" data-es="Servicios" data-en="Services">Servicios</a>
+        <a href="index.html#preguntas" data-es="Preguntas frecuentes" data-en="Frequent questions">Preguntas frecuentes</a>
         <a href="sobre-nosotros.html" data-es="Nosotros" data-en="About">Nosotros</a>
         <a href="index.html#contacto" data-es="Contacto" data-en="Contact">Contacto</a>
       </div>
@@ -78,7 +99,7 @@
       <div class="footer-links">
         <a href="https://wa.me/51991472352" target="_blank" rel="noopener noreferrer">WhatsApp: 991 472 352</a>
         <a href="mailto:andresmontalvoseguros@gmail.com">andresmontalvoseguros@gmail.com</a>
-        <a href="tel:0834422027">083-422027</a>
+        <a href="tel:+5183422027">083-422027</a>
       </div>
     </div>
 
@@ -98,7 +119,7 @@
   </div>
 
   <div class="footer-bottom">
-    <p>&copy; <span id="year"></span> Andrés Montalvo Chero. <span data-es="Todos los derechos reservados." data-en="All rights reserved.">Todos los derechos reservados.</span></p>
+    <p><span class="footer-copy">&copy; <span id="year"></span> Andrés Montalvo Chero. <span data-es="Todos los derechos reservados." data-en="All rights reserved.">Todos los derechos reservados.</span></span><a class="footer-legal-link" href="privacidad.html" data-es="Política de privacidad" data-en="Privacy policy">Política de privacidad</a></p>
   </div>
 </footer>
 

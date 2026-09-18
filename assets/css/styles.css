@@ -18,6 +18,15 @@
   --texto-oscuro: #1F2430;
   --error: #B3261E;
 
+  /* El naranja de marca es un color de superficie, no de texto: sobre
+     hueso da 2.43:1 y sobre blanco 2.65:1, muy por debajo del 4.5:1 que
+     pide AA. Esta es la misma tinta -idéntico tono (31°) y saturación
+     (81%), solo más oscura- que sí pasa: 4.56:1 sobre hueso y 4.96:1
+     sobre blanco. Se usa únicamente donde el naranja es TEXTO; las
+     superficies (marca de sección, botón del 404, link activo sobre
+     azul) siguen con --naranja-marca, que ahí sí contrasta de sobra. */
+  --naranja-texto: #A65E11;
+
   /* Gris auxiliar para texto secundario sobre fondo claro (no forma parte
      de la paleta de marca, evita usar negro puro en párrafos largos) */
   --texto-muted: #454C5E;
@@ -26,11 +35,50 @@
   --font-titulares: 'Fraunces', Georgia, serif;
   --font-cuerpo: 'Work Sans', Arial, sans-serif;
 
+  /* Escala tipográfica. Seis pasos, y nada fuera de ellos salvo los
+     titulares de display (que usan clamp propio). Antes había catorce
+     tamaños distintos -0.78, 0.85, 0.9, 0.95, 0.98, 1, 1.02, 1.05, 1.08,
+     1.1, 1.15, 1.25rem...- sin relación entre sí: diferencias de medio
+     píxel que no se leen como jerarquía, solo como descuido. */
+  --fs-3xs: 0.6875rem;  /* 11px — rótulos en versalita */
+  --fs-2xs: 0.75rem;    /* 12px — rótulos, metadatos */
+  --fs-xs: 0.8125rem;   /* 13px — pies, créditos */
+  --fs-sm: 0.9375rem;   /* 15px — texto de apoyo, links de navegación */
+  --fs-md: 1.0625rem;   /* 17px — base de lectura */
+  --fs-lg: 1.1875rem;   /* 19px — párrafo destacado */
+  --fs-xl: 1.375rem;    /* 22px — subtítulo */
+
+  /* Un solo radio en todo el sitio. Casi recto, como un sello o un
+     documento impreso: ni esquinas vivas (duras para un sitio que habla
+     de cercanía) ni pastillas de 999px (el gesto SaaS que este negocio
+     justamente no es). */
+  --radio: 2px;
+
   /* Layout */
   --container-max: 1220px;
   --container-pad: 1.75rem;
   --header-height: 84px;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fraunces es una variable font con dos ejes propios que el sitio no
+   estaba pidiendo: SOFT (redondeo de los terminales) y WONK (alternativas
+   "torcidas" de g, y, f). Con WONK en 0 -el default- Fraunces se ve como
+   cualquier serif de transición; con WONK en 1 aparece la voz que hace
+   que el titular se lea como tipografía elegida y no como la serif que
+   venía puesta. Se aplica solo en tamaños de display, que es donde el
+   detalle se alcanza a ver. */
+.hero-title,
+.about-masthead h1,
+.notfound-title,
+.section-head h2,
+.servicio-group-title,
+.servicios-reading-name,
+.alianzas-statement,
+.about-teaser-inner h2,
+.about-section h2 {
+  font-variation-settings: 'SOFT' 0, 'WONK' 1;
+  font-optical-sizing: auto;
 }
 
 /* --------------------------------------------------------------------------
@@ -149,22 +197,6 @@ body.lang-fade {
   transition: opacity 0.15s ease;
 }
 
-/* Barra de progreso de scroll: se inyecta desde script.js, por encima
-   del header (que tiene z-index:100) pero sin formar parte de él, así
-   que sigue visible incluso cuando el header se oculta al bajar. */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--naranja-marca);
-  transform: scaleX(0);
-  transform-origin: left;
-  z-index: 150;
-  pointer-events: none;
-}
-
 /* Grano sutil sobre los bloques de color sólido (azul-marca / azul-marino).
    SVG de ruido (feTurbulence) como pseudo-elemento, con mix-blend-mode para
    que se perciba como textura de superficie y no como una capa aparte.
@@ -239,14 +271,20 @@ body.lang-fade {
   margin-bottom: 3.5rem;
 }
 
+/* A tamaño de display el espaciado por defecto de Fraunces se ve suelto;
+   el tracking negativo lo compacta y es lo que hace que un titular se lea
+   como compuesto y no como texto agrandado. La regla del sitio: negativo
+   en display, cero en cuerpo, positivo abierto en versalitas. */
 .section-head h2 {
   font-size: clamp(1.9rem, 4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.018em;
   color: var(--azul-marino);
   margin-bottom: 0.9rem;
 }
 
 .section-head p {
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
   color: var(--texto-muted);
 }
 
@@ -255,7 +293,7 @@ body.lang-fade {
   position: relative;
   display: inline-block;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   color: var(--azul-marca);
   width: fit-content;
 }
@@ -278,9 +316,6 @@ body.lang-fade {
   transform: scaleX(1);
 }
 
-.text-link-light {
-  color: var(--hueso);
-}
 
 /* Pastilla reutilizable para CTAs secundarios (alianzas, testimonios,
    teaser de "quiénes somos"). La sombra vive en el elemento de afuera y el
@@ -290,20 +325,30 @@ body.lang-fade {
    Va siempre en blanco: las tres secciones donde vive (alianzas,
    testimonios y el teaser) tienen fondo hueso o azul, así que el blanco es
    el único tono que le da contraste en las tres por igual. */
+/* Botón secundario. Antes era una pastilla blanca de 999px flotando con
+   sombra difusa: el gesto exacto de una landing de SaaS, que es justo lo
+   que este negocio no es. Ahora es un rectángulo casi recto con filete
+   fino -vocabulario de documento impreso, no de interfaz-, y el relleno
+   sólido llega en el hover en vez de una sombra que crece.
+   La sombra vive en el elemento de afuera y el recorte en el envoltorio
+   interno: si ambos vivieran en el mismo elemento, su propio
+   overflow:hidden recortaría también la sombra (el mismo reparto de
+   responsabilidades que .servicio-group-panel/-inner). */
 .btn-pill {
   position: relative;
   display: inline-flex;
-  border-radius: 999px;
+  border-radius: var(--radio);
   background: var(--blanco);
   color: var(--azul-marino);
-  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0.12);
-  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+  box-shadow: inset 0 0 0 1px rgba(6, 38, 79, 0.22);
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 .btn-pill:hover,
 .btn-pill:focus-visible {
-  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.28);
-  transform: translateY(-2px);
+  background: var(--azul-marino);
+  color: var(--hueso);
+  box-shadow: inset 0 0 0 1px var(--azul-marino);
 }
 
 .btn-pill-inner {
@@ -312,9 +357,13 @@ body.lang-fade {
   align-items: center;
   overflow: hidden;
   border-radius: inherit;
-  padding: 0.85rem 1.8rem;
+  /* min-height cumple el mínimo de 44px de área de toque aunque el texto
+     sea corto; el padding vertical por sí solo se quedaba en 43px. */
+  min-height: 44px;
+  padding: 0.7rem 1.65rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.01em;
 }
 
 /* Modificador "caballo": el caballito vive oculto fuera del borde
@@ -338,11 +387,22 @@ body.lang-fade {
   pointer-events: none;
 }
 
+/* El caballito del logo es azul, y el botón secundario ahora se rellena de
+   azul-marino al hacer hover: sin esto el ícono entraría galopando para
+   volverse invisible contra el fondo. brightness(0) lo aplana a negro e
+   invert(1) lo vuelve blanco, conservando la silueta y el canal alfa, así
+   que no hace falta un segundo archivo ni hay parpadeo al intercambiar
+   imágenes a mitad de la animación. */
 .btn-caballo-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.btn-caballo:hover .btn-caballo-icon img,
+.btn-caballo:focus-visible .btn-caballo-icon img {
+  filter: brightness(0) invert(1);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -417,8 +477,9 @@ body.lang-fade {
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 42px;
-  height: 42px;
+  /* 44x44: se quedaba en 42x42, dos píxeles por debajo del mínimo. */
+  width: 44px;
+  height: 44px;
   background: none;
   border: none;
   padding: 0;
@@ -431,7 +492,16 @@ body.lang-fade {
   width: 26px;
   margin: 0 auto;
   background: var(--azul-marino);
-  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease);
+  transition: transform 0.25s var(--ease), opacity 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+
+/* Con el menú abierto, el panel a pantalla completa es azul-marino y las
+   barras del botón también eran azul-marino: la X de cerrar quedaba
+   literalmente invisible sobre su propio fondo. El botón seguía siendo
+   clickeable, pero no había nada que indicara dónde. Abierto, las barras
+   pasan a hueso. */
+.nav-toggle[aria-expanded="true"] span {
+  background: var(--hueso);
 }
 
 .nav-toggle[aria-expanded="true"] span:nth-child(1) {
@@ -467,10 +537,15 @@ body.lang-fade {
 
 .nav-link {
   position: relative;
+  display: flex;
+  align-items: center;
+  /* 44px de área de toque en el panel móvil: el texto solo daba 38px. */
+  min-height: 44px;
   font-size: 1.5rem;
   font-family: var(--font-titulares);
+  font-weight: 500;
   color: var(--hueso);
-  letter-spacing: 0.02em;
+  letter-spacing: -0.005em;
 }
 
 .nav-link[aria-current="page"],
@@ -484,13 +559,17 @@ body.lang-fade {
   align-self: flex-start;
   margin-top: 0.5rem;
   border: 1.5px solid var(--hueso);
+  border-radius: var(--radio);
   background: none;
   color: var(--hueso);
   font-family: var(--font-cuerpo);
   font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.03em;
-  padding: 0.5rem 1rem;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.08em;
+  /* 44x44 mínimos: antes medía 56x36. */
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.5rem 1.1rem;
   transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
 }
 
@@ -517,17 +596,14 @@ body.lang-fade {
   height: 44px;
   background: var(--verde-whatsapp);
   color: var(--azul-marino);
-  border-radius: 999px;
+  border-radius: var(--radio);
   flex-shrink: 0;
   overflow: hidden;
-  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
-  transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  transition: background-color 0.2s var(--ease);
 }
 
 .nav-cta:hover {
   background: var(--verde-whatsapp-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -8px rgba(6, 38, 79, 0.35);
 }
 
 .nav-cta-icon {
@@ -548,7 +624,7 @@ body.lang-fade {
   padding-right: 1.1rem;
   font-family: var(--font-cuerpo);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   white-space: nowrap;
 }
 
@@ -573,30 +649,43 @@ body.lang-fade {
 }
 
 .hero-copy {
-  padding: 4.5rem var(--container-pad) 3.5rem calc(var(--container-pad) + 1rem);
+  padding: 3.25rem var(--container-pad) 3rem calc(var(--container-pad) + 1rem);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
+/* La firma va en versalita sans, no en serif al mismo tamaño que el
+   subtítulo: así queda claro que es el rótulo de quién habla y no una
+   segunda línea del mensaje, y deja de competir con el titular. */
 .hero-byline {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-family: var(--font-titulares);
-  font-size: 1.1rem;
-  letter-spacing: 0.02em;
-  color: rgba(247, 245, 240, 0.78);
-  margin-bottom: 1.6rem;
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(247, 245, 240, 0.8);
+  margin-bottom: 1.5rem;
   max-width: 26rem;
 }
 
+/* El titular es lo primero y más grande que se ve, así que es donde el
+   tratamiento tiene que notarse: peso 600 (no 500), tracking negativo
+   -a tamaño de display el espaciado por defecto se ve suelto- y una
+   interlínea de 1.06, más cerrada que la global de 1.15, para que las
+   líneas se lean como un bloque compacto y no como renglones sueltos. */
 .hero-title {
-  font-size: clamp(2.1rem, 4.4vw, 2.6rem);
-  font-weight: 500;
+  font-size: clamp(2.2rem, 3.4vw, 3.15rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.021em;
   color: var(--hueso);
   margin-bottom: 1.5rem;
-  max-width: 24rem;
+  /* Sin tope en mobile: ahí el ancho de la columna ya es el límite. El
+     tope real se fija en la media query de desktop. */
 }
 
 .hero-title-line {
@@ -604,7 +693,7 @@ body.lang-fade {
 }
 
 .hero-subtitle {
-  font-size: 1.08rem;
+  font-size: var(--fs-md);
   color: rgba(247, 245, 240, 0.85);
   max-width: 26rem;
   margin-bottom: 2.2rem;
@@ -628,16 +717,16 @@ body.lang-fade {
   background: var(--verde-whatsapp);
   color: var(--azul-marino);
   font-weight: 600;
-  font-size: 1.02rem;
-  padding: 0.95rem 1.75rem;
-  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
-  transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  font-size: var(--fs-md);
+  min-height: 52px;
+  padding: 0.9rem 1.75rem;
+  border-radius: var(--radio);
+  letter-spacing: 0.005em;
+  transition: background-color 0.2s var(--ease);
 }
 
 .btn-whatsapp:hover {
   background: var(--verde-whatsapp-hover);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.35);
 }
 
 .icon-whatsapp {
@@ -695,49 +784,6 @@ body.lang-fade {
   pointer-events: none;
 }
 
-/* Indicador de scroll: línea delgada centrada al pie del hero. Es un
-   link real a #cobertura-resumen (no JS) para heredar automáticamente
-   el scroll-behavior:smooth global y su respeto por
-   prefers-reduced-motion a nivel de navegador. El drop-shadow oscuro
-   mantiene la línea clara legible sin importar qué tan clara sea la
-   zona de la foto que quede detrás. */
-.hero-scroll-cue {
-  position: absolute;
-  left: 50%;
-  bottom: 1.6rem;
-  transform: translateX(-50%);
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.hero-scroll-cue-line {
-  width: 1px;
-  height: 28px;
-  background: var(--hueso);
-  filter: drop-shadow(0 1px 3px rgba(6, 38, 79, 0.55));
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero-scroll-cue-line {
-    animation: respirar 2s ease-in-out infinite;
-  }
-}
-
-@keyframes respirar {
-  0%, 100% {
-    opacity: 0.45;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(4px);
-  }
-}
-
 /* Entrada orquestada del hero: un solo momento, al cargar la página. El
    titular entra línea por línea (cada .hero-title-line con su propio
    delay, ~90ms de diferencia) y el subtítulo/botón esperan a que esa
@@ -760,18 +806,15 @@ body.lang-fade {
   .hero-subtitle { animation-delay: 0.34s; }
   .hero-actions { animation-delay: 0.46s; }
 
-  /* Aparición al cargar (opacidad) y Ken Burns (zoom continuo) viven en
-     elementos distintos (ver comentario de .hero-photo-inner arriba), así
-     que no compiten por la propiedad transform. */
+  /* Antes la foto también llevaba un Ken Burns (zoom perpetuo de 23s en
+     bucle infinito). Se retiró: es el gesto exacto de "foto de stock con
+     movimiento lento", corría para siempre gastando GPU en mobile, y se
+     superponía con el parallax de scroll sobre la misma imagen. Queda
+     solo la aparición al cargar; el movimiento de la foto ahora responde
+     al scroll del usuario y no a un temporizador. */
   .hero-photo-inner img {
     opacity: 0;
-    animation-name: aparecer, kenburns;
-    animation-duration: 0.9s, 23s;
-    animation-timing-function: var(--ease), ease-in-out;
-    animation-delay: 0.2s, 0s;
-    animation-iteration-count: 1, infinite;
-    animation-direction: normal, alternate;
-    animation-fill-mode: forwards, none;
+    animation: aparecer 0.9s var(--ease) 0.2s forwards;
   }
 }
 
@@ -786,14 +829,6 @@ body.lang-fade {
   }
 }
 
-@keyframes kenburns {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.06);
-  }
-}
 
 @keyframes aparecer {
   from {
@@ -806,7 +841,7 @@ body.lang-fade {
 
 /* --------------------------------------------------------------------------
    Franja de resumen de coberturas — puramente informativa, sin clic. Los
-   8 servicios en una sola línea de texto para que se entienda de un
+   6 seguros más consultados en una sola línea de texto para que se entienda de un
    vistazo qué se cubre, sin tener que interactuar con el índice de abajo.
    -------------------------------------------------------------------------- */
 
@@ -824,7 +859,7 @@ body.lang-fade {
   flex-wrap: wrap;
   justify-content: center;
   font-family: var(--font-cuerpo);
-  font-size: 1.02rem;
+  font-size: var(--fs-md);
   font-weight: 500;
   color: var(--azul-marino);
 }
@@ -861,13 +896,13 @@ body.lang-fade {
 
 .como-trabajamos-item h3 {
   font-family: var(--font-titulares);
-  font-size: 1.25rem;
+  font-size: var(--fs-xl);
   color: var(--azul-marino);
   margin-bottom: 0.65rem;
 }
 
 .como-trabajamos-item p {
-  font-size: 1rem;
+  font-size: var(--fs-md);
   line-height: 1.6;
   color: var(--texto-muted);
 }
@@ -899,7 +934,7 @@ body.lang-fade {
   border-top: 1px solid rgba(6, 38, 79, 0.16);
 }
 
-/* Los 8 servicios se agrupan en dos categorías plegables ("Para ti" /
+/* Los 12 servicios se agrupan en dos categorías plegables ("Para ti" /
    "Para tu empresa") para que la lista no abrume de entrada: la mayoría
    de visitantes solo necesita la primera, así que arranca abierta,
    mientras la de empresa arranca cerrada. Reusa la misma técnica de
@@ -931,6 +966,7 @@ body.lang-fade {
   font-family: var(--font-titulares);
   font-size: clamp(1.55rem, 2.4vw, 1.9rem);
   font-weight: 600;
+  letter-spacing: -0.015em;
   color: var(--azul-marino);
 }
 
@@ -981,9 +1017,9 @@ body.lang-fade {
    sin introducir un tercer nivel de acordeón, solo un rótulo. */
 .servicio-subheading {
   font-family: var(--font-cuerpo);
-  font-size: 0.78rem;
+  font-size: var(--fs-2xs);
   font-weight: 600;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--texto-muted);
   padding: 1.25rem 0.25rem 0.35rem 0.9rem;
@@ -1001,7 +1037,7 @@ body.lang-fade {
   display: flex;
   align-items: baseline;
   width: 100%;
-  /* Antes 1.15rem: la lista de 8 servicios ocupaba casi toda la
+  /* Antes 1.15rem: la lista de servicios ocupaba casi toda la
      pantalla. La barra de acento ya marca la selección por sí sola, así
      que no hace falta tanto aire para que se lea como un índice.
      padding-left mayor que el del encabezado de categoría (0.25rem):
@@ -1078,7 +1114,7 @@ body.lang-fade {
 .servicio-panel-mobile-inner p {
   padding: 0 0.25rem 1.5rem;
   color: var(--texto-muted);
-  font-size: 1.02rem;
+  font-size: var(--fs-md);
   line-height: 1.6;
   max-width: 38rem;
 }
@@ -1100,8 +1136,12 @@ body.lang-fade {
    resto, y el valor ya está actualizado cuando reaparece. */
 .servicios-reading-number {
   position: absolute;
-  top: -0.35em;
-  right: -0.15em;
+  /* Antes iba arriba a la derecha y se cruzaba por detrás del título del
+     servicio: dos cosas compitiendo en el mismo sitio. Abajo a la derecha
+     el número queda como folio al pie -que es de donde viene el gesto-
+     y no pisa ninguna línea de texto. */
+  bottom: -0.34em;
+  right: -0.06em;
   z-index: 0;
   font-family: var(--font-titulares);
   font-size: clamp(120px, 13vw, 190px);
@@ -1119,12 +1159,15 @@ body.lang-fade {
 .servicios-reading-name {
   font-family: var(--font-titulares);
   font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  line-height: 1.15;
   color: var(--azul-marino);
   margin: 0 0 1.1rem;
 }
 
 .servicios-reading-text {
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   line-height: 1.7;
   color: var(--texto-muted);
   max-width: 36rem;
@@ -1146,31 +1189,69 @@ body.lang-fade {
 }
 
 .alianzas .section-inner {
-  padding-bottom: 4rem;
+  padding-bottom: 4.5rem;
 }
 
-.alianzas-content {
-  max-width: 42rem;
+.alianzas .section-head {
+  margin-bottom: 2.25rem;
 }
 
-.alianzas-content h2 {
+/* Bloque de constancia. La referencia deliberada es un documento
+   institucional -filete doble arriba, rótulo en versalita, declaración a
+   cuerpo de titular- y no una tarjeta de interfaz: nada de sombra, nada
+   de fondo flotante, solo filetes sobre el mismo hueso de la sección. El
+   filete superior es doble (2px + 1px separados) porque es el gesto que
+   distingue un certificado de un simple separador.
+   Acá llegó a haber un caballito del logo como sello al margen: a 54px
+   quedaba ilegible y, apoyado contra el filete, se leía como un caballo
+   corriendo sobre un cable. El motivo se queda donde sí funciona -el
+   botón de "¿Quiénes somos?"-, que además era el punto: usarlo una vez,
+   no repetirlo. */
+.alianzas-constancia {
+  position: relative;
+  max-width: 46rem;
+  padding: 2.5rem 0 0;
+  border-top: 2px solid var(--azul-marino);
+}
+
+.alianzas-constancia::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--azul-marino);
+}
+
+.alianzas-eyebrow {
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--naranja-texto);
+  margin: 0 0 1.1rem;
+}
+
+/* El convenio se lee a tamaño de titular, no de párrafo: es el dato con
+   más peso institucional del sitio y antes iba al mismo cuerpo que
+   cualquier otro texto de apoyo. */
+.alianzas-statement {
   font-family: var(--font-titulares);
-  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 400;
+  line-height: 1.38;
+  letter-spacing: -0.01em;
   color: var(--azul-marino);
-  margin: 0 0 1rem;
-}
-
-.alianzas-content p {
-  font-size: 1.05rem;
-  line-height: 1.7;
-  color: var(--texto-muted);
-  margin: 0 0 1.25rem;
+  margin: 0 0 2rem;
 }
 
 .alianzas-nombre {
   font-weight: 600;
   color: var(--azul-marca);
 }
+
 
 /* --------------------------------------------------------------------------
    Teaser de "¿Quiénes somos?" — puente breve hacia sobre-nosotros.html.
@@ -1210,7 +1291,7 @@ body.lang-fade {
 }
 
 .about-teaser-inner p {
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
   line-height: 1.7;
   color: rgba(247, 245, 240, 0.82);
 }
@@ -1236,14 +1317,23 @@ body.lang-fade {
 
 /* Matriz 2x2: 1 columna en mobile, 2 columnas x 2 filas desde tablet,
    con líneas finas como únicos separadores (sin cajas, sin sombras). */
+/* grid-auto-rows: 1fr empareja las filas. Las cuatro reseñas son reales y
+   de largo muy distinto ("El buen servicio y rapidez" contra cuatro
+   renglones), así que sin esto la matriz 2x2 queda coja: la fila de abajo
+   con la mitad de altura que la de arriba. Con filas parejas el aire
+   sobrante se reparte igual y el conjunto se lee como una retícula
+   deliberada en vez de un descuadre. */
 .testimonios-grid {
   display: grid;
   grid-template-columns: 1fr;
+  grid-auto-rows: 1fr;
   border-top: 1px solid rgba(6, 38, 79, 0.14);
   margin-bottom: 2.25rem;
 }
 
 .testimonio-card {
+  display: flex;
+  flex-direction: column;
   padding: 1.75rem 0;
   border-bottom: 1px solid rgba(6, 38, 79, 0.14);
 }
@@ -1268,7 +1358,10 @@ body.lang-fade {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-3xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--texto-muted);
   white-space: nowrap;
 }
@@ -1280,7 +1373,7 @@ body.lang-fade {
 
 .testimonio-card blockquote p {
   font-family: var(--font-titulares);
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   line-height: 1.4;
   color: var(--azul-marino);
   margin: 0;
@@ -1289,7 +1382,7 @@ body.lang-fade {
 .testimonios-footer {
   text-align: center;
   color: var(--texto-muted);
-  font-size: 0.98rem;
+  font-size: var(--fs-sm);
 }
 
 .testimonios-footer p {
@@ -1306,16 +1399,15 @@ body.lang-fade {
   background: var(--naranja-marca);
   color: var(--azul-marino);
   font-weight: 600;
-  font-size: 1.02rem;
-  padding: 0.95rem 1.75rem;
-  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
-  transition: filter 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  font-size: var(--fs-md);
+  min-height: 52px;
+  padding: 0.9rem 1.75rem;
+  border-radius: var(--radio);
+  transition: filter 0.2s var(--ease);
 }
 
 .btn-naranja:hover {
-  filter: brightness(0.92);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.35);
+  filter: brightness(0.93);
 }
 
 /* El foco en hueso (heredado de .notfound :focus-visible en 404.html) no
@@ -1323,6 +1415,207 @@ body.lang-fade {
    azul-marino. */
 .btn-naranja:focus-visible {
   outline-color: var(--azul-marino);
+}
+
+/* --------------------------------------------------------------------------
+   Preguntas frecuentes — mismo acordeón de "cortina" (grid-template-rows
+   0fr → 1fr) que ya usan el índice de servicios y sus grupos, para que los
+   tres colapsos del sitio se sientan como el mismo mecanismo. Sin cajas ni
+   sombras: filetes finos, igual que el resto.
+   -------------------------------------------------------------------------- */
+
+.faq {
+  background: var(--blanco);
+}
+
+.faq .section-inner {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.faq-list {
+  max-width: 48rem;
+  border-top: 1px solid rgba(6, 38, 79, 0.16);
+}
+
+.faq-item {
+  border-bottom: 1px solid rgba(6, 38, 79, 0.16);
+}
+
+/* La pregunta es un h3 para que el listado forme parte del esquema de
+   encabezados de la página; el botón vive dentro del h3, no al revés,
+   que es el patrón que esperan los lectores de pantalla. */
+.faq-question-heading {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.faq-trigger {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 1.15rem 0.25rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.faq-question {
+  font-family: var(--font-titulares);
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--azul-marino);
+  transition: color 0.2s var(--ease);
+}
+
+.faq-trigger:hover .faq-question,
+.faq-trigger:focus-visible .faq-question {
+  color: var(--azul-marca);
+}
+
+.faq-item.is-open .faq-question {
+  color: var(--azul-marca);
+}
+
+/* Un signo "+" que rota hasta convertirse en "×" al abrir: dos filetes
+   cruzados construidos en CSS, sin SVG ni icono extra que cargar. */
+.faq-icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.3rem;
+}
+
+.faq-icon::before,
+.faq-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: var(--azul-marca);
+}
+
+.faq-icon::after {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .faq-icon::before,
+  .faq-icon::after {
+    transition: transform 0.25s var(--ease);
+  }
+}
+
+.faq-item.is-open .faq-icon::after {
+  transform: rotate(0deg);
+}
+
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .faq-panel {
+    transition: grid-template-rows 0.3s var(--ease);
+  }
+}
+
+.faq-item.is-open .faq-panel {
+  grid-template-rows: 1fr;
+}
+
+.faq-panel-inner {
+  overflow: hidden;
+}
+
+.faq-panel-inner p {
+  padding: 0 0.25rem 1.5rem;
+  max-width: 42rem;
+  font-size: var(--fs-md);
+  line-height: 1.65;
+  color: var(--texto-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Páginas legales — reusan .about-masthead / .about-body / .about-section,
+   así que solo necesitan estas dos piezas propias.
+   -------------------------------------------------------------------------- */
+
+/* Enlaces dentro del cuerpo de texto legal. No llevan min-height de 44px
+   a propósito: WCAG 2.5.8 exime explícitamente los destinos en línea
+   dentro de una frase, cuyo tamaño lo condiciona el interlineado del
+   texto que los rodea. Forzarlos a 44px rompería el renglón. Lo que sí
+   necesitan es leerse como enlaces, y para eso va el subrayado. */
+.about-section p a {
+  font-weight: 600;
+  color: var(--azul-marca);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: color 0.2s var(--ease);
+}
+
+.about-section p a:hover {
+  color: var(--azul-marino);
+}
+
+.legal-updated {
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texto-muted);
+  margin: 0 0 0.5rem;
+}
+
+.legal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 1.1rem 0 1.4rem;
+  max-width: 42rem;
+}
+
+/* El texto que sigue a una lista necesita su propio aire: la regla
+   general de separación solo actúa entre párrafos consecutivos
+   (p + p), así que un <p> después de un <ul> quedaba pegado al
+   último ítem. */
+.legal-list + p {
+  margin-top: 0.4rem;
+}
+
+/* Viñeta propia: un filete corto en naranja, el mismo vocabulario de la
+   marca de sección, en vez del disco por defecto del navegador. */
+.legal-list li {
+  position: relative;
+  padding-left: 1.6rem;
+  font-size: var(--fs-md);
+  line-height: 1.65;
+  color: var(--texto-muted);
+}
+
+.legal-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 12px;
+  height: 2px;
+  background: var(--naranja-marca);
 }
 
 /* --------------------------------------------------------------------------
@@ -1362,7 +1655,7 @@ body.lang-fade {
 .form-field textarea {
   width: 100%;
   font-family: var(--font-cuerpo);
-  font-size: 1rem;
+  font-size: var(--fs-md);
   padding: 1.1rem 0.9rem 0.4rem;
   border: 1px solid rgba(6, 38, 79, 0.3);
   background: var(--blanco);
@@ -1380,7 +1673,7 @@ body.lang-fade {
   position: absolute;
   left: 0.95rem;
   top: 0.85rem;
-  font-size: 1rem;
+  font-size: var(--fs-md);
   letter-spacing: 0.02em;
   color: var(--texto-muted);
   pointer-events: none;
@@ -1400,7 +1693,7 @@ body.lang-fade {
 .form-field textarea:focus + label,
 .form-field textarea:not(:placeholder-shown) + label {
   top: -0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-2xs);
   color: var(--azul-marca);
 }
 
@@ -1412,7 +1705,7 @@ body.lang-fade {
 .field-error {
   display: block;
   color: var(--error);
-  font-size: 0.85rem;
+  font-size: var(--fs-xs);
   margin-top: 0.4rem;
   min-height: 1.1em;
 }
@@ -1430,17 +1723,16 @@ body.lang-fade {
   background: var(--azul-marca);
   color: var(--hueso);
   font-weight: 600;
-  font-size: 1rem;
-  padding: 0.75rem 1.75rem;
+  font-size: var(--fs-md);
+  min-height: 48px;
+  padding: 0.75rem 1.9rem;
   border: none;
-  box-shadow: 0 2px 6px -2px rgba(6, 38, 79, 0);
-  transition: background 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  border-radius: var(--radio);
+  transition: background-color 0.2s var(--ease);
 }
 
 .btn-submit:hover {
   background: var(--azul-marino);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px -8px rgba(6, 38, 79, 0.35);
 }
 
 .btn-submit:disabled {
@@ -1449,7 +1741,7 @@ body.lang-fade {
 }
 
 .form-status {
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   min-height: 1.2em;
 }
 
@@ -1477,18 +1769,42 @@ body.lang-fade {
   padding-top: 0;
 }
 
+/* Rótulos en versalita y filete fino: la columna derecha de contacto pasa
+   de ser una lista de pares título/valor -lo más genérico de la página- a
+   leerse como la ficha de datos de un documento, que es el mismo
+   vocabulario del bloque de constancia de Alianzas. */
 .direct-info h3 {
-  font-size: 0.9rem;
-  letter-spacing: 0.03em;
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-3xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--texto-muted);
-  font-weight: 500;
-  margin-bottom: 0.35rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
 }
 
 .direct-info p {
-  font-size: 1.08rem;
+  font-size: var(--fs-md);
   color: var(--azul-marino);
+  font-weight: 500;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* Los datos que son enlace llevan subrayado fino y separado: en una ficha
+   de contacto hay que poder distinguir de un vistazo qué se puede tocar
+   (WhatsApp, correo, teléfono) de qué es solo dato (las direcciones). */
+.direct-info a {
+  /* 44px de área de toque: los datos-enlace daban 20px de alto. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(6, 38, 79, 0.28);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease);
 }
 
 .direct-info p + p {
@@ -1497,6 +1813,7 @@ body.lang-fade {
 
 .direct-info a:hover {
   color: var(--azul-marca);
+  text-decoration-color: var(--azul-marca);
 }
 
 /* --------------------------------------------------------------------------
@@ -1531,28 +1848,40 @@ body.lang-fade {
 }
 
 .footer-tagline {
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   color: rgba(247, 245, 240, 0.7);
   max-width: 22rem;
 }
 
+/* rgba(...,0.5) daba 3.55:1 sobre el azul de marca, bajo el 4.5:1 de AA.
+   A 0.72 sube a 6.0:1 y el rótulo sigue leyéndose como secundario frente
+   a los links, que van a 0.85. */
 .footer-col-title {
   font-family: var(--font-cuerpo);
-  font-size: 0.85rem;
+  font-size: var(--fs-2xs);
   font-weight: 600;
-  letter-spacing: 0.03em;
-  color: rgba(247, 245, 240, 0.5);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(247, 245, 240, 0.72);
 }
 
 .footer-links {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.15rem;
 }
 
+/* Los links del footer medían 25px de alto. El alto mínimo de 44px se
+   consigue con padding vertical, y el gap de la columna baja en
+   consecuencia para que el bloque no crezca de más. */
 .footer-links a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.2rem 0;
   color: rgba(247, 245, 240, 0.85);
-  font-size: 0.98rem;
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
 }
 
 .footer-links a:hover {
@@ -1563,15 +1892,35 @@ body.lang-fade {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 0.35rem;
+  /* Sin esto, un hijo flex no baja de su ancho de contenido. */
+  min-width: 0;
+  max-width: 100%;
 }
 
+/* "@andresmontalvoseguros" mide 202px y no tiene por dónde cortarse. En
+   la columna de ~145px que le tocaba desde que el footer pasa a 4
+   columnas (700px), empujaba el documento entero a 802px de ancho contra
+   un viewport de 768: el navegador respondía haciendo zoom-out de TODA la
+   página ~4%. No era scroll horizontal, era la página achicándose, y por
+   eso no aparecía como overflow. overflow-wrap deja que el handle corte
+   si hace falta, y min-width:0 permite que el flex se encoja. */
 .footer-social {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  min-width: 0;
+  max-width: 100%;
   color: var(--hueso);
   font-weight: 500;
+  /* 44px de área de toque: antes eran 26px de alto. */
+  min-height: 44px;
+  padding: 0.25rem 0;
+}
+
+.footer-social span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .footer-social:hover {
@@ -1588,11 +1937,33 @@ body.lang-fade {
 }
 
 .footer-bottom p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1.25rem;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 1.25rem var(--container-pad);
-  font-size: 0.85rem;
-  color: rgba(247, 245, 240, 0.65);
+  padding: 0.5rem var(--container-pad);
+  font-size: var(--fs-xs);
+  /* rgba(...,0.65) daba 4.3:1 sobre el azul de marca, apenas por debajo
+     de AA. A 0.72 llega a 5.69:1. */
+  color: rgba(247, 245, 240, 0.72);
+}
+
+.footer-legal-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: rgba(247, 245, 240, 0.85);
+  text-decoration: underline;
+  text-decoration-color: rgba(247, 245, 240, 0.35);
+  text-underline-offset: 0.22em;
+  transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease);
+}
+
+.footer-legal-link:hover {
+  color: var(--hueso);
+  text-decoration-color: var(--hueso);
 }
 
 /* --------------------------------------------------------------------------
@@ -1610,12 +1981,14 @@ body.lang-fade {
 
 .about-masthead h1 {
   font-size: clamp(2.4rem, 6vw, 3.4rem);
+  font-weight: 600;
+  letter-spacing: -0.022em;
   color: var(--hueso);
   margin-bottom: 1rem;
 }
 
 .about-masthead p {
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
   color: rgba(247, 245, 240, 0.85);
   max-width: 32rem;
 }
@@ -1633,23 +2006,33 @@ body.lang-fade {
 .about-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0;
 }
 
+/* min-height de 44px para el área de toque; el gap de la columna baja en
+   consecuencia para que el índice no gane altura de más. */
 .about-nav a {
   display: flex;
   align-items: baseline;
   gap: 0.7rem;
-  font-size: 0.98rem;
+  min-height: 44px;
+  padding: 0.55rem 0;
+  font-size: var(--fs-sm);
   color: var(--texto-muted);
   font-weight: 500;
   transition: color 0.2s var(--ease);
 }
 
+/* rgba(azul-marino, 0.4) daba 2.38:1 sobre hueso. Se sube la opacidad a
+   0.75 en vez de cambiar de color: sigue siendo exactamente la tinta de
+   marca (azul-marino), solo menos diluida, y llega a 6.1:1. El número
+   conserva su papel de dato secundario porque es más chico y va en
+   serif, no porque esté desteñido hasta ser ilegible. */
 .about-nav-number {
   font-family: var(--font-titulares);
-  font-size: 0.85rem;
-  color: rgba(6, 38, 79, 0.4);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: rgba(6, 38, 79, 0.75);
 }
 
 .about-nav a:hover,
@@ -1688,12 +2071,13 @@ body.lang-fade {
 }
 
 .about-section-number {
-  font-size: 0.95rem;
-  color: var(--naranja-marca);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--naranja-texto);
 }
 
 .about-section p {
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
   color: var(--texto-muted);
   max-width: 42rem;
 }
@@ -1716,13 +2100,13 @@ body.lang-fade {
 }
 
 .about-reason h3 {
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
   color: var(--azul-marino);
   margin-bottom: 0.4rem;
 }
 
 .about-reason p {
-  font-size: 1.02rem;
+  font-size: var(--fs-md);
   color: var(--texto-muted);
   max-width: 40rem;
 }
@@ -1730,13 +2114,13 @@ body.lang-fade {
 .coverage-list {
   margin-top: 1.4rem;
   font-family: var(--font-titulares);
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
   color: var(--azul-marino);
   letter-spacing: 0.01em;
 }
 
 .coverage-list span {
-  color: var(--naranja-marca);
+  color: var(--naranja-texto);
   margin: 0 0.3rem;
 }
 
@@ -1744,8 +2128,12 @@ body.lang-fade {
    Página 404
    -------------------------------------------------------------------------- */
 
+/* azul-marino, no azul-marca: el footer ya es azul-marca, y con los dos
+   del mismo tono la página del 404 se leía como una sola losa azul
+   continua separada apenas por un filete al 15%. El tono más oscuro
+   devuelve la estructura de dos bloques. */
 .notfound {
-  background: var(--azul-marca);
+  background: var(--azul-marino);
   color: var(--hueso);
   min-height: 60vh;
   display: flex;
@@ -1762,19 +2150,22 @@ body.lang-fade {
 }
 
 .notfound-eyebrow {
-  font-size: 1rem;
+  font-size: var(--fs-md);
   color: rgba(247, 245, 240, 0.65);
   margin-bottom: 1.2rem;
 }
 
 .notfound-title {
   font-size: clamp(2.1rem, 5vw, 2.9rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   color: var(--hueso);
   margin-bottom: 1.2rem;
 }
 
 .notfound-text {
-  font-size: 1.08rem;
+  font-size: var(--fs-md);
   color: rgba(247, 245, 240, 0.85);
   margin-bottom: 2rem;
 }
@@ -1793,8 +2184,13 @@ body.lang-fade {
     grid-template-columns: 1.15fr 0.85fr;
   }
 
+  /* La columna de contacto lleva la cadena más larga del sitio (el correo,
+     ~240px) y con cuatro columnas iguales le tocaban ~243px: justo en el
+     límite, así que overflow-wrap lo partía a mitad de palabra
+     ("...gmail.c / om"). Se le da más ancho a costa de las dos columnas
+     de links, que son cortas. */
   .footer-columns {
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    grid-template-columns: 1.25fr 0.85fr 1.35fr 1.05fr;
     gap: 2rem;
   }
 
@@ -1848,7 +2244,7 @@ body.lang-fade {
   }
 
   .nav-link {
-    font-size: 1rem;
+    font-size: var(--fs-md);
     font-family: var(--font-cuerpo);
     font-weight: 500;
     color: var(--azul-marino);
@@ -1925,7 +2321,7 @@ body.lang-fade {
     border-color: var(--azul-marino);
     color: var(--azul-marino);
     padding: 0.4rem 0.85rem;
-    font-size: 0.85rem;
+    font-size: var(--fs-xs);
   }
 
   .lang-toggle:hover {
@@ -1933,14 +2329,30 @@ body.lang-fade {
     color: var(--hueso);
   }
 
+  /* 42/58 en vez de 35/65. Con la columna de texto al 35% el titular caía
+     en siete líneas a 1440px: a esa altura deja de leerse como titular y
+     se lee como párrafo. Siete puntos porcentuales más de columna, más el
+     titular acortado, lo dejan en cuatro. La foto pierde ancho pero no
+     lectura: el sujeto está a la derecha del encuadre y el corte diagonal
+     se calcula sobre la propia foto, así que sigue funcionando igual. */
   .hero {
-    grid-template-columns: 35% 65%;
+    grid-template-columns: 42% 58%;
     min-height: 620px;
   }
 
+  /* Padding fluido, no fijo. Con 5.5rem constantes de sangría izquierda el
+     titular volvía a caer en cinco líneas justo al cruzar el breakpoint
+     (860-1100px): ahí la columna ya es del 42% pero el viewport todavía es
+     angosto, así que la sangría se comía el ancho de lectura. Con vw la
+     sangría se encoge junto con la pantalla y el conteo de líneas se
+     mantiene estable en todo el rango de desktop. */
   .hero-copy {
-    padding: 0 3rem 0 8rem;
+    padding: 0 clamp(1.5rem, 2.5vw, 3.5rem) 0 clamp(2rem, 5vw, 5.5rem);
     justify-content: center;
+  }
+
+  .hero-title {
+    max-width: 17ch;
   }
 
   .hero-photo {
@@ -1975,7 +2387,7 @@ body.lang-fade {
        desborda, con la misma proporción 42:58. */
     grid-template-columns: 42fr 58fr;
     gap: 3.5rem;
-    /* La lista de 8 nombres es naturalmente más alta que el texto del
+    /* La lista de nombres es naturalmente más alta que el texto del
        servicio seleccionado (que puede ser un solo párrafo corto). Con
        "start" ese desnivel se veía como un vacío enorme debajo del
        panel; centrando ambas columnas, el panel queda a media altura de
@@ -1998,7 +2410,7 @@ body.lang-fade {
     display: block;
     /* Amortigua el salto de altura entre servicios cortos (una sola
        oración) y largos, sin forzar que el panel intente igualar el
-       alto completo de la lista de 8 nombres. */
+       alto completo de la lista de nombres. */
     min-height: 11rem;
     padding-top: 0.5rem;
     opacity: 1;
