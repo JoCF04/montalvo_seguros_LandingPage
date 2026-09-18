@@ -5,3 +5,9 @@ repomix-output.xml
 
 # Basura del sistema de archivos
 .DS_Store
+
+# Original sin optimizar de la foto del convenio. La raíz del repositorio
+# es la raíz web en GitHub Pages, así que un JPG de 184 KB ahí se serviría
+# públicamente sin que nada lo referencie. La versión que usa el sitio es
+# assets/img/convenio.webp (49 KB). El original se queda en tu disco.
+convenio.jpg

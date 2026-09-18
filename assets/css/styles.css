@@ -1428,12 +1428,17 @@ body.menu-open .site-header {
    corriendo sobre un cable. El motivo se queda donde sí funciona -el
    botón de "¿Quiénes somos?"-, que además era el punto: usarlo una vez,
    no repetirlo. */
+/* Sin max-width: el bloque ocupa el ancho completo de la sección, igual
+   que las retículas de servicios, testimonios y contacto. Estuvo limitado
+   a 58rem dentro de un contenedor de ~1164px, lo que dejaba unos 236px
+   muertos a la derecha y hacía que la sección entera se leyera apretada
+   contra el margen izquierdo, desalineada del resto de la página. */
 .alianzas-constancia {
   position: relative;
-  max-width: 46rem;
   padding: 2.5rem 0 0;
   border-top: 2px solid var(--azul-marino);
 }
+
 
 .alianzas-constancia::before {
   content: '';
@@ -1458,6 +1463,12 @@ body.menu-open .site-header {
 /* El convenio se lee a tamaño de titular, no de párrafo: es el dato con
    más peso institucional del sitio y antes iba al mismo cuerpo que
    cualquier otro texto de apoyo. */
+.alianzas-constancia > .btn-pill {
+  margin-top: 2rem;
+  align-self: start;
+  justify-self: start;
+}
+
 .alianzas-statement {
   font-family: var(--font-titulares);
   font-size: clamp(1.35rem, 2.5vw, 1.75rem);
@@ -1465,13 +1476,129 @@ body.menu-open .site-header {
   line-height: 1.38;
   letter-spacing: -0.01em;
   color: var(--azul-marino);
-  margin: 0 0 2rem;
+  margin: 0;
 }
 
 .alianzas-nombre {
   font-weight: 600;
   color: var(--azul-marca);
 }
+
+/* El dato de las 120 oficinas. Era una oración más dentro del enunciado y
+   se perdía. Ahora usa el mismo recurso que el resto de números del sitio
+   -Fraunces, tabular-nums, como el contador de años de sobre-nosotros- con
+   la cifra a tamaño de display y la frase como contexto secundario a su
+   lado. No es una "stat card": no hay caja, ni sombra, ni fondo propio;
+   solo un filete fino arriba, igual que separa todo lo demás. */
+/* El dato, recuadrado. Aquí llegó a haber un rótulo en versalita
+   ("MÁS DE") sobre una cifra grande: ese apilado etiqueta-sobre-número es
+   el patrón de métrica de cualquier panel de SaaS, y metido en una caja
+   seguía siéndolo. Ahora es una frase corrida y la cifra se destaca
+   dentro de ella -Fraunces sobre el sans del cuerpo, un punto más grande,
+   sin cambiar de línea-, que es como un periódico resalta un número
+   dentro de un texto. La presencia la da la caja; el número solo tiene
+   que leerse, no gritar.
+   La caja usa el mismo filete fino, el mismo radio de 2px y el mismo
+   blanco sobre hueso que el botón que tiene debajo. */
+.alianzas-dato {
+  margin: 1.6rem 0 0;
+  /* La caja se ajusta al texto en vez de estirarse a toda la columna. Con
+     el ancho completo (552px) y el texto balanceado ocupando unos 330,
+     quedaban más de 200px de blanco muerto a la derecha DENTRO del
+     recuadro, que es justo lo que delataba la caja como un contenedor
+     vacío en vez de un apunte al margen. */
+  max-width: 23rem;
+  padding: 1.1rem 1.3rem;
+  background: var(--blanco);
+  border: 1px solid rgba(6, 38, 79, 0.16);
+  border-radius: var(--radio);
+  font-size: var(--fs-md);
+  line-height: 1.6;
+  color: var(--texto-muted);
+  /* text-wrap: balance reparte el texto en renglones de ancho parecido en
+     vez de llenar el primero hasta el borde y dejar el último corto. En un
+     bloque de dos o tres líneas como este es la diferencia entre una caja
+     que se ve compuesta y una con un escalón a la derecha. Donde no esté
+     soportado, el texto simplemente fluye como siempre. */
+  text-wrap: balance;
+}
+
+.alianzas-dato-num {
+  font-family: var(--font-titulares);
+  font-size: 1.3em;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'SOFT' 0, 'WONK' 1;
+  color: var(--azul-marino);
+}
+
+/* La foto del convenio. Sin marco ni sombra: filete fino y esquinas casi
+   rectas, el mismo tratamiento que el resto del bloque. El pie no es
+   visible -la imagen ya se explica con su alt y con el texto de al lado-,
+   así que la figure no lleva figcaption. */
+.alianzas-foto {
+  margin: 2rem 0 0;
+}
+
+.alianzas-foto img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radio);
+  box-shadow: 0 0 0 1px rgba(6, 38, 79, 0.16);
+}
+
+/* Desde 860px el bloque se abre en dos columnas: el texto y el dato a la
+   izquierda, la foto de la firma a la derecha, y el botón debajo del
+   texto. El filete doble sigue cruzando ambas columnas por arriba, que es
+   lo que mantiene la foto dentro del documento y no pegada encima. */
+@media (min-width: 860px) {
+  .alianzas-constancia {
+    display: grid;
+    grid-template-columns: 1fr 1.02fr;
+    column-gap: 3rem;
+    align-items: start;
+  }
+
+  .alianzas-cuerpo,
+  .alianzas-constancia > .btn-pill {
+    grid-column: 1;
+  }
+
+  /* La foto llena la columna de arriba abajo en vez de flotar como
+     miniatura: se estira a todo el alto del bloque de texto y la imagen
+     se recorta con object-fit para llenarlo sin deformarse. El origen es
+     muy panorámico (2.38:1) y el hueco es casi cuadrado, así que el
+     recorte es fuerte; object-position 47% centra el encuadre en las dos
+     personas y el documento firmado -el asunto de la foto- y conserva el
+     borde del estandarte de la cooperativa a la derecha. */
+  .alianzas-foto {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+    margin: 0;
+    position: relative;
+    /* Suelo por si la columna de texto quedara muy corta; el alto real lo
+       manda la retícula. */
+    min-height: 24rem;
+  }
+
+  /* La imagen se saca del flujo: si participara del cálculo de alto, su
+     propia altura entraría en el dimensionado de las filas y el
+     height:100% se resolvería contra un alto que ella misma define.
+     Absoluta, la retícula fija el alto del hueco y la imagen lo llena. */
+  .alianzas-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 47% center;
+  }
+}
+
+/* En mobile la foto conserva su proporción panorámica: apilada bajo el
+   texto, a ancho completo, no hay nada que rellenar. */
 
 
 /* --------------------------------------------------------------------------
@@ -1538,23 +1665,21 @@ body.menu-open .site-header {
 
 /* Matriz 2x2: 1 columna en mobile, 2 columnas x 2 filas desde tablet,
    con líneas finas como únicos separadores (sin cajas, sin sombras). */
-/* grid-auto-rows: 1fr empareja las filas. Las cuatro reseñas son reales y
-   de largo muy distinto ("El buen servicio y rapidez" contra cuatro
-   renglones), así que sin esto la matriz 2x2 queda coja: la fila de abajo
-   con la mitad de altura que la de arriba. Con filas parejas el aire
-   sobrante se reparte igual y el conjunto se lee como una retícula
-   deliberada en vez de un descuadre. */
+/* Las filas se dimensionan según su contenido. Aquí llegó a haber un
+   grid-auto-rows: 1fr para emparejarlas, pero las dos reseñas cortas
+   ("El buen servicio y rapidez" son cuatro palabras) quedaban entonces
+   con 109px de aire muerto debajo, y esa fila de abajo se leía como un
+   hueco antes del botón. Las filas desiguales no descuadran nada: los
+   filetes separan cada reseña y el conjunto se lee como una lista, que es
+   lo que es. */
 .testimonios-grid {
   display: grid;
   grid-template-columns: 1fr;
-  grid-auto-rows: 1fr;
   border-top: 1px solid rgba(6, 38, 79, 0.14);
   margin-bottom: 2.25rem;
 }
 
 .testimonio-card {
-  display: flex;
-  flex-direction: column;
   padding: 1.75rem 0;
   border-bottom: 1px solid rgba(6, 38, 79, 0.14);
 }
@@ -2480,17 +2605,99 @@ body.menu-open .site-header {
   max-width: 40rem;
 }
 
+/* Zonas de cobertura en dos bloques: donde atiende hoy y lo que viene.
+   La jerarquía no la da el color -teñir las próximas de gris claro las
+   dejaría por debajo de AA- sino el rótulo en versalita y el tamaño:
+   las vigentes van a cuerpo de párrafo destacado, las próximas un paso
+   por debajo, y ambas en la misma tinta legible. */
+.coverage-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  margin-top: 1.6rem;
+}
+
+/* El bloque de zonas cierra la sección de contacto, separado del grid por
+   un filete fino: primero cómo contactarme, después dónde atiendo. Va a
+   ancho completo porque son ocho regiones y la columna derecha del grid
+   (0.85fr) las partiría en demasiadas líneas. */
+.cobertura-zonas {
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(6, 38, 79, 0.16);
+}
+
+.cobertura-zonas .coverage-groups {
+  margin-top: 0;
+}
+
+.coverage-label {
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-muted);
+  margin: 0 0 0.5rem;
+}
+
+.coverage-group-soon .coverage-label {
+  color: var(--naranja-texto);
+}
+
 .coverage-list {
-  margin-top: 1.4rem;
+  margin: 0;
   font-family: var(--font-titulares);
   font-size: var(--fs-lg);
   color: var(--azul-marino);
   letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+.coverage-group-soon .coverage-list {
+  font-size: var(--fs-md);
 }
 
 .coverage-list span {
   color: var(--naranja-texto);
   margin: 0 0.3rem;
+}
+
+@media (min-width: 700px) {
+  .coverage-groups {
+    flex-direction: row;
+    gap: 2.25rem;
+    align-items: flex-start;
+  }
+
+  .coverage-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Filete de separación entre los dos bloques, el mismo recurso de
+     línea fina que usa el resto del sitio. El bloque de "próximamente"
+     no se encoge: son dos nombres cortos y no tiene por qué partirse. */
+  .coverage-group-soon {
+    flex: 0 0 auto;
+    padding-left: 2.25rem;
+    border-left: 1px solid rgba(6, 38, 79, 0.16);
+  }
+
+  /* En contacto hay ancho de sobra: la lista de hoy se queda con el
+     espacio que necesita y "próximamente" se apoya a la derecha, en vez
+     de repartirse a partes iguales. */
+  .cobertura-zonas .coverage-group {
+    flex: 0 1 auto;
+  }
+
+  .cobertura-zonas .coverage-groups {
+    gap: 3rem;
+  }
+
+  .cobertura-zonas .coverage-group-soon {
+    padding-left: 3rem;
+  }
 }
 
 /* --------------------------------------------------------------------------
