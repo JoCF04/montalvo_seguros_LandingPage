@@ -94,6 +94,20 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-height);
+  /* Red de seguridad para el panel de navegación móvil, que es
+     position:fixed y vive aparcado fuera de pantalla a la derecha
+     (translateX(100%)) mientras está cerrado. En cuanto el header se
+     oculta al bajar -transform: translateY(-100%)-, el header pasa a ser
+     bloque contenedor de sus descendientes fixed, y a partir de ahí el
+     panel entra en el cálculo de scrollWidth: el documento pasa a medir
+     el doble del viewport.
+     Medido en Chrome: ese desborde NO llega a ser desplazable (scrollX se
+     queda en 0 con y sin esta regla), así que hoy no se ve. Se deja igual
+     porque cuesta una línea y evita depender de ese detalle de
+     implementación en otros motores.
+     clip, y no hidden: hidden crearía un contenedor de scroll y rompería
+     el position:sticky del propio header. */
+  overflow-x: clip;
 }
 
 body {
@@ -1814,6 +1828,150 @@ body.lang-fade {
 .direct-info a:hover {
   color: var(--azul-marca);
   text-decoration-color: var(--azul-marca);
+}
+
+/* --------------------------------------------------------------------------
+   Aviso emergente de envío (toast)
+   Mismo vocabulario que el resto del sitio: bloque de color sólido, filete
+   de acento, esquinas casi rectas. Nada de blur, nada de pastilla, nada de
+   sombra flotante difusa; la profundidad la da una sombra corta y cerrada.
+   -------------------------------------------------------------------------- */
+
+.toast-region {
+  position: fixed;
+  z-index: 300;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
+  /* El contenedor cubre el ancho de pantalla pero no debe interceptar
+     clics donde no hay aviso; cada aviso los recupera por su cuenta. */
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem 1rem 1.25rem;
+  background: var(--azul-marino);
+  color: var(--hueso);
+  border-radius: var(--radio);
+  /* El filete de acento reusa el mismo gesto que la marca de inicio de
+     sección: el color dice el resultado sin depender solo del texto. */
+  border-left: 3px solid var(--verde-whatsapp);
+  box-shadow: 0 8px 24px -12px rgba(6, 38, 79, 0.65);
+  pointer-events: auto;
+}
+
+.toast.is-error {
+  border-left-color: var(--naranja-marca);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 0.1rem;
+  color: var(--verde-whatsapp);
+}
+
+.toast.is-error .toast-icon {
+  color: var(--naranja-marca);
+}
+
+.toast-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-family: var(--font-cuerpo);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(247, 245, 240, 0.72);
+  margin: 0 0 0.25rem;
+}
+
+.toast-text {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--hueso);
+  margin: 0;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -0.6rem -0.5rem -0.6rem 0;
+  padding: 0;
+  background: none;
+  border: none;
+  color: rgba(247, 245, 240, 0.7);
+  font-size: 1.35rem;
+  line-height: 1;
+  transition: color 0.2s var(--ease);
+}
+
+.toast-close:hover {
+  color: var(--hueso);
+}
+
+.toast :focus-visible {
+  outline-color: var(--hueso);
+}
+
+/* Entrada y salida. Bajo prefers-reduced-motion el aviso simplemente
+   aparece y desaparece, sin desplazamiento ni fundido. */
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+
+  .toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast.is-leaving {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Desde tablet el aviso se ancla abajo a la derecha y deja de ocupar todo
+   el ancho: a 1440px una barra de borde a borde se lee como alerta de
+   sistema, no como confirmación de un formulario. */
+@media (min-width: 700px) {
+  .toast-region {
+    left: auto;
+    right: 1.75rem;
+    bottom: 1.75rem;
+    align-items: flex-end;
+    max-width: 24rem;
+  }
+
+  .toast {
+    width: 100%;
+  }
 }
 
 /* --------------------------------------------------------------------------

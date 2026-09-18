@@ -648,6 +648,14 @@
   </div>
 </footer>
 
+<!-- Región de avisos. Vive fuera de <main> porque el aviso pertenece a la
+     página, no a la sección donde está el formulario, y tiene que seguir
+     anunciándose aunque el foco se haya movido a otra parte. El contenedor
+     existe siempre en el DOM (aunque esté vacío): una región aria-live que
+     se inserta al mismo tiempo que su contenido no la anuncian de forma
+     fiable los lectores de pantalla. -->
+<div class="toast-region" id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+
 <script src="assets/js/script.js"></script>
 </body>
 </html>

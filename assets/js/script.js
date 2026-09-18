@@ -39,7 +39,10 @@
       statusInvalid: 'Revisa los campos marcados antes de enviar.',
       statusSending: 'Enviando mensaje...',
       statusSuccess: 'Gracias por escribir. Te contactaré a la brevedad.',
-      statusError: 'No se pudo enviar el mensaje. Intenta nuevamente o escríbeme por WhatsApp.'
+      statusError: 'No se pudo enviar el mensaje. Intenta nuevamente o escríbeme por WhatsApp.',
+      toastSuccessTitle: 'Mensaje enviado',
+      toastErrorTitle: 'No se pudo enviar',
+      toastClose: 'Cerrar aviso'
     },
     en: {
       menuOpen: 'Open navigation menu',
@@ -51,7 +54,10 @@
       statusInvalid: 'Please check the highlighted fields before sending.',
       statusSending: 'Sending message...',
       statusSuccess: 'Thanks for reaching out. I will get back to you shortly.',
-      statusError: 'The message could not be sent. Please try again or message me on WhatsApp.'
+      statusError: 'The message could not be sent. Please try again or message me on WhatsApp.',
+      toastSuccessTitle: 'Message sent',
+      toastErrorTitle: 'Could not send',
+      toastClose: 'Dismiss notification'
     }
   };
 
@@ -747,6 +753,97 @@
     }
   });
 
+  /* Aviso emergente (toast) para el resultado del envío.
+     Solo se usa para el DESENLACE del envío (enviado / no se pudo). Los
+     errores de validación siguen en línea, junto a los campos, que es
+     donde el usuario tiene que mirar para corregirlos: sacarlos a una
+     esquina de la pantalla haría más difícil arreglarlos, no más fácil.
+     Un aviso a la vez: si llega uno nuevo, el anterior se retira. */
+  var toastRegion = document.getElementById('toast-region');
+  var toastTimer = null;
+  var TOAST_MS = 6000;
+
+  function dismissToast(toast) {
+    if (!toast || toast.dataset.leaving === '1') return;
+    toast.dataset.leaving = '1';
+
+    if (prefersReducedMotion) {
+      toast.remove();
+      return;
+    }
+
+    toast.classList.remove('is-visible');
+    toast.classList.add('is-leaving');
+    toast.addEventListener('transitionend', function handler(event) {
+      if (event.target !== toast || event.propertyName !== 'opacity') return;
+      toast.removeEventListener('transitionend', handler);
+      toast.remove();
+    });
+  }
+
+  function showToast(type, message) {
+    if (!toastRegion) return;
+
+    window.clearTimeout(toastTimer);
+    Array.prototype.forEach.call(toastRegion.children, dismissToast);
+
+    var toast = document.createElement('div');
+    toast.className = 'toast' + (type === 'error' ? ' is-error' : '');
+
+    var icon = document.createElement('span');
+    icon.className = 'toast-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML = type === 'error'
+      ? '<svg viewBox="0 0 20 20"><path d="M10 6v5M10 14h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+      : '<svg viewBox="0 0 20 20"><path d="M6 10.4l2.6 2.6L14.4 7.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+
+    var body = document.createElement('div');
+    body.className = 'toast-body';
+
+    var title = document.createElement('p');
+    title.className = 'toast-title';
+    title.textContent = type === 'error' ? t('toastErrorTitle') : t('toastSuccessTitle');
+
+    var text = document.createElement('p');
+    text.className = 'toast-text';
+    text.textContent = message;
+
+    body.appendChild(title);
+    body.appendChild(text);
+
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'toast-close';
+    close.setAttribute('aria-label', t('toastClose'));
+    close.innerHTML = '&times;';
+    close.addEventListener('click', function () {
+      window.clearTimeout(toastTimer);
+      dismissToast(toast);
+    });
+
+    toast.appendChild(icon);
+    toast.appendChild(body);
+    toast.appendChild(close);
+    toastRegion.appendChild(toast);
+
+    /* Dos frames antes de marcarlo visible: en uno solo el navegador
+       puede agrupar la inserción y el cambio de clase en el mismo estilo
+       calculado y la transición no llega a correr. */
+    if (!prefersReducedMotion) {
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          toast.classList.add('is-visible');
+        });
+      });
+    }
+
+    toastTimer = window.setTimeout(function () {
+      dismissToast(toast);
+    }, TOAST_MS);
+
+    return toast;
+  }
+
   /* Validación y envío del formulario de contacto */
   var form = document.getElementById('contact-form');
 
@@ -831,6 +928,46 @@
       statusEl.textContent = t('statusSending');
       statusEl.className = 'form-status';
 
+      var onSuccess = function () {
+        /* El desenlace se cuenta en el aviso emergente, así que el texto
+           en línea se limpia: si no, el mismo mensaje quedaría dicho dos
+           veces, y un lector de pantalla lo anunciaría dos veces (ambos
+           son regiones aria-live). */
+        statusEl.textContent = '';
+        statusEl.className = 'form-status';
+        form.reset();
+        showToast('success', t('statusSuccess'));
+      };
+
+      var onFailure = function () {
+        /* Acá el texto en línea SÍ se conserva: menciona el WhatsApp como
+           salida alternativa, y esa sigue estando disponible después de
+           que el aviso se haya cerrado solo. */
+        statusEl.textContent = t('statusError');
+        statusEl.className = 'form-status is-error';
+        showToast('error', t('statusError'));
+      };
+
+      /* Modo demostración: con ?demo=1 en la URL, el envío no sale a la
+         red y se responde con el aviso de éxito. Existe para poder
+         enseñar el formulario funcionando mientras el access_key de
+         Web3Forms siga siendo el de ejemplo (con ese valor, un envío real
+         siempre falla).
+         Va atado a un parámetro de la URL, no a una constante del código,
+         a propósito: así es imposible que quede activado por descuido en
+         producción. Sin el parámetro -es decir, para cualquier visitante
+         que llegue al sitio con normalidad- nunca se muestra una
+         confirmación de algo que no se envió. */
+      var demoMode = /[?&]demo=1(&|$)/.test(window.location.search);
+
+      if (demoMode) {
+        window.setTimeout(function () {
+          onSuccess();
+          submitBtn.disabled = false;
+        }, 700);
+        return;
+      }
+
       var formData = new FormData(form);
 
       fetch('https://api.web3forms.com/submit', {
@@ -843,18 +980,12 @@
         })
         .then(function (data) {
           if (data.success) {
-            statusEl.textContent = t('statusSuccess');
-            statusEl.className = 'form-status is-success';
-            form.reset();
+            onSuccess();
           } else {
-            statusEl.textContent = t('statusError');
-            statusEl.className = 'form-status is-error';
+            onFailure();
           }
         })
-        .catch(function () {
-          statusEl.textContent = t('statusError');
-          statusEl.className = 'form-status is-error';
-        })
+        .catch(onFailure)
         .finally(function () {
           submitBtn.disabled = false;
         });
